@@ -2,6 +2,7 @@ package com.gmail.samueler53.fwhumanstratego.objects;
 
 import com.gmail.samueler53.fwhumanstratego.gui.RoleGui;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,7 +18,7 @@ public class Squad {
     private final String name;
     private int points = 0;
     private final Map<UUID, Role> playersRoles = new HashMap<>();
-    private Map<Role, Integer> rolesRemaining = new HashMap<>();
+    private final Map<Role, Integer> rolesRemaining = new HashMap<>();
     private final ItemStack kit = new ItemStack(Material.LEATHER_CHESTPLATE);
     private final RoleGui roleGui;
     private final Material treasure;

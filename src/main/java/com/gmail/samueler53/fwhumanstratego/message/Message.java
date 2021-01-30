@@ -47,8 +47,8 @@ public enum Message {
     GAME_SETPOINTS(MessageUtils.formatErrorMessage("Devi inserire tutti i punti"), true),
     GAME_ROLEFULL(ChatColor.GREEN + "Il ruolo non e' disponibile", true),
     GAME_ROLEBUSY(ChatColor.GREEN + "Il ruolo non ha piu' posti disponibili!", true),
-    GAME_TEAMWINNER("La partita e' terminata, ha vinto il team " + "{}", true),
-    GAME_ROUNDWINNER("Il round e' terminato, ha vinto il team " + "{}", true),
+    GAME_TEAMWINNER(ChatColor.DARK_PURPLE + "La partita e' terminata, ha vinto il team " + ChatColor.BOLD + "{}", true),
+    GAME_ROUNDWINNER(ChatColor.DARK_GREEN + "Il round e' terminato, ha vinto il team " + ChatColor.BOLD + "{}", true),
     GAME_DRAW(ChatColor.GREEN + "La partita e' finita in pareggio", true),
     GAME_KILLEDBY(ChatColor.GREEN + "Sei stato ucciso da " + "{}", true),
     GAME_KILLED(ChatColor.GREEN + "Hai ucciso " + "{}", true),
@@ -67,7 +67,7 @@ public enum Message {
     GAME_LEAVE(ChatColor.GREEN + "Sei stato rimosso dalla partita!", true),
     GAME_LEAVEGAMEFIRST(MessageUtils.formatErrorMessage("Prima devi leftare il tuo game attuale"), true),
     GAME_LEAVEWHENSTARTED(MessageUtils.formatErrorMessage("Non ti permetto di abbandonare i tuoi compagni!"), true),
-    GAME_EDITABLE("Partita modificata con successo", true),
+    GAME_EDITABLE(ChatColor.GREEN + "Partita modificata con successo", true),
     GAME_UNMODIFIABLE(MessageUtils.formatErrorMessage("Non puoi modificare la partita! Ci sono attualmente piu' giocatori di quanti ne hai inseriti"), true),
     GAME_UNMODIFIABLE2(MessageUtils.formatErrorMessage("Non puoi modificare la partita! La partita sta per iniziare!"), true),
     GAME_STARTED(MessageUtils.formatErrorMessage("Non puoi modificare una partita gia' iniziata!"), true),
@@ -85,14 +85,7 @@ public enum Message {
     }
 
     public void send(Player player, Object... objects) {
-        if (asString(objects).contains("red")) {
-            player.sendMessage(ChatColor.DARK_RED + asString(objects));
-        } else if (asString(objects).contains("blue")) {
-            player.sendMessage(ChatColor.BLUE + asString(objects));
-        } else {
-            player.sendMessage(asString(objects));
-        }
-
+        player.sendMessage(asString(objects));
     }
 
     public void broadcast(Game game, Object... objects) {

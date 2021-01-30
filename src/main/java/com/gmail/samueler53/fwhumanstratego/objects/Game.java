@@ -266,7 +266,7 @@ public class Game {
         return Arrays.stream(s).anyMatch(String -> String.equalsIgnoreCase(roleDamaged.getName()));
     }
 
-    public void setNumberOfPlayers(int numberOfPlayers){
+    public void setNumberOfPlayers(int numberOfPlayers) {
         this.numberOfPlayers = numberOfPlayers;
     }
 
