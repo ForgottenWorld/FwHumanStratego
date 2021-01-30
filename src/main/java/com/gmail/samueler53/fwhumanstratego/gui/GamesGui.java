@@ -71,12 +71,16 @@ public class GamesGui {
     private void addAPlayer(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
         assert player != null;
-        Message.GAME_JOIN.send(player);
-        game.addAPlayer(uuid);
-        game.getPlayersLocations().put(uuid, player.getLocation());
-        arenaManager.teleportPlayerToLobby(uuid, game.getArena());
-        game.clearPlayer(uuid);
-        player.closeInventory();
+        if (game.getNumberOfPlayers() != game.getPlayersPlaying().size()) {
+            Message.GAME_JOIN.send(player);
+            game.addAPlayer(uuid);
+            game.getPlayersLocations().put(uuid, player.getLocation());
+            arenaManager.teleportPlayerToLobby(uuid, game.getArena());
+            game.clearPlayer(uuid);
+            player.closeInventory();
+        } else {
+            Message.GAME_GAMEFULL.send(player);
+        }
     }
 
 }

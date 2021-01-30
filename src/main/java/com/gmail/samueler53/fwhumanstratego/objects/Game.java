@@ -242,8 +242,10 @@ public class Game {
         Player player = Bukkit.getPlayer(uuid);
         assert player != null;
         if (otherSquad.getTreasure() == Material.BLUE_WOOL) {
+            player.getInventory().remove(Material.BLUE_WOOL);
             arenaManager.treasureBlue(arena.getTreasureBlueLocation(), arena);
         } else if (otherSquad.getTreasure() == Material.RED_WOOL) {
+            player.getInventory().remove(Material.RED_WOOL);
             arenaManager.treasureRed(arena.getTreasureRedLocation(), arena);
         }
     }

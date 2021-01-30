@@ -6,6 +6,7 @@ import com.gmail.samueler53.fwhumanstratego.message.Message;
 import com.gmail.samueler53.fwhumanstratego.objects.Game;
 import com.gmail.samueler53.fwhumanstratego.objects.Squad;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,7 +34,9 @@ public class onPlayerInventoryClickListener implements Listener {
                     event.setCancelled(true);
                 }
                 try {
-                    if (game.isStarted()) {
+                    if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+                        event.setCancelled(true);
+                    } else if (game.isStarted()) {
                         Squad squad = game.getSquadFromPlayer(uuid);
                         Material treasure = squad.getTreasure();
                         Squad otherSquad = game.getOtherSquad(squad);
