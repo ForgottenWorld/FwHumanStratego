@@ -1,0 +1,17 @@
+name: FwHumanStratego
+version: @version@
+main: com.gmail.samueler53.fwhumanstratego.FwHumanStratego
+api-version: 1.16
+commands:
+  humanstratego:
+    permission: humanstratego.usercommand
+    description: Comando base
+    aliases: hs
+    usage: test
+    permission-message: Non hai i permessi per usare questo comando
+  humanstrategoadmin:
+    permission: humanstratego.admincommand
+    description: Comando admin
+    aliases: hsa
+    usage: test
+    permission-message: Non hai i permessi per usare questo comando
