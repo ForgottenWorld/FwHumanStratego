@@ -143,13 +143,18 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
     private void stopGame(Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
         assert player != null;
-        Game game = gameManager.getGameFromArena(arena);
-        game.teleportPlayersInPreviouslyLocation();
-        game.clearEachPlayer();
-        game.getScoreboard().removeScoreboards();
-        gameManager.removeGame(game);
-        gameManager.getGamesGui().removeGame(game);
-        Message.GAME_STOPPED.send(player);
+        if (gameManager.isArenaBusy(arena)) {
+            Game game = gameManager.getGameFromArena(arena);
+            game.teleportPlayersInPreviouslyLocation();
+            game.clearEachPlayer();
+            game.getScoreboard().removeScoreboards();
+            gameManager.getGamesGui().removeGame(game);
+            Bukkit.broadcastMessage("test");
+            gameManager.removeGame(game);
+            Message.GAME_STOPPED.send(player);
+        } else {
+            Message.GAME_ARENAFREE.send(player);
+        }
     }
 
     private void modifyGame(String value, Arena arena, UUID uuid) {
