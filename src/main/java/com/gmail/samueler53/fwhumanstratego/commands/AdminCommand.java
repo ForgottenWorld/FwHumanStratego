@@ -122,9 +122,9 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
             if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
                 if (arenaManager.locationsSet(arena)) {
                     if (!gameManager.isArenaBusy(arena)) {
-                        Message.GAME_NEWGAME.broadcastAll();
                         gameManager.startNewGame(arena, numberOfPlayers);
                         Game game = gameManager.getGameFromArena(arena);
+                        gameManager.message();
                         gameManager.getGamesGui().createNewGame(arena, game);
                     } else {
                         Message.GAME_ARENABUSY.send(player);

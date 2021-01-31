@@ -3,11 +3,16 @@ package com.gmail.samueler53.fwhumanstratego.managers;
 import com.gmail.samueler53.fwhumanstratego.gui.GamesGui;
 import com.gmail.samueler53.fwhumanstratego.objects.Arena;
 import com.gmail.samueler53.fwhumanstratego.objects.Game;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class GameManager {
     private static GameManager instance;
@@ -25,6 +30,23 @@ public class GameManager {
             instance = new GameManager();
         }
         return instance;
+    }
+
+    public void message() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String startMessage = ChatColor.GREEN + String.join("", Collections.nCopies(53, "-")) + ChatColor.DARK_AQUA + "Ciao " + player.getName() + ", se vuoi giocare a HumanStratego, clicca sotto";
+            TextComponent clickMessage = new TextComponent("\n\n [Clicca qui per giocare]\n");
+            clickMessage.setColor(ChatColor.GREEN);
+            clickMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs join"));
+            clickMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Clicca per giocare")));
+            String endMessage = ChatColor.GREEN + String.join("", Collections.nCopies(53, "-"));
+            ComponentBuilder message = new ComponentBuilder();
+            message
+                    .append(startMessage)
+                    .append(clickMessage)
+                    .append(endMessage);
+            player.spigot().sendMessage(message.create());
+        }
     }
 
     public void startNewGame(Arena arena, int numberOfPlayers) {
