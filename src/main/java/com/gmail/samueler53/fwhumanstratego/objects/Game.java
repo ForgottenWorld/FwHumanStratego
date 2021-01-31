@@ -5,6 +5,11 @@ import com.gmail.samueler53.fwhumanstratego.gui.TeamGui;
 import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager;
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager;
 import com.gmail.samueler53.fwhumanstratego.message.Message;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -105,6 +110,16 @@ public class Game {
             }
         }
         return normalRoles;
+    }
+
+    public void messageRole(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        TextComponent clickMessage = new TextComponent("[INFORMAZIONI SUL RUOLO]");
+        clickMessage.setColor(ChatColor.GREEN);
+        clickMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs info " + getRoleFromPlayer(uuid).getName()));
+        clickMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Clicca per avere informazioni sul tuo ruolo")));
+        assert player != null;
+        player.spigot().sendMessage(clickMessage);
     }
 
     public void addAPlayer(UUID uuid) {

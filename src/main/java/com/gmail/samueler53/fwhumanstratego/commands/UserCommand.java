@@ -3,6 +3,7 @@ package com.gmail.samueler53.fwhumanstratego.commands;
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager;
 import com.gmail.samueler53.fwhumanstratego.message.Message;
 import com.gmail.samueler53.fwhumanstratego.objects.Game;
+import com.gmail.samueler53.fwhumanstratego.objects.Role;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -41,6 +42,10 @@ public class UserCommand implements CommandExecutor {
                     if (args[0].equalsIgnoreCase("join") && args[1].equalsIgnoreCase("team")) {
                         if (gameManager.isPlayerPlaying(uuid).isPresent()) {
                             playerJoinTeam(uuid);
+                        }
+                    } else if (args[0].equalsIgnoreCase("info")) {
+                        if (gameManager.isPlayerPlaying(uuid).isPresent()) {
+                            infoRole(uuid, args[1]);
                         }
                     }
                 }
@@ -83,6 +88,18 @@ public class UserCommand implements CommandExecutor {
         Game game = gameManager.getGameWherePlayerPlaying(uuid);
         if (!game.isStarted()) {
             game.getTeamGui().show(uuid);
+        }
+    }
+
+    private void infoRole(UUID uuid, String roleName) {
+        Game game = gameManager.getGameWherePlayerPlaying(uuid);
+        Player player = Bukkit.getPlayer(uuid);
+        assert player != null;
+        if (game.isStarted()) {
+            if (game.getRoleByName(roleName) != null) {
+                Role role = game.getRoleByName(roleName);
+                player.sendMessage(role.getDescription());
+            }
         }
     }
 }

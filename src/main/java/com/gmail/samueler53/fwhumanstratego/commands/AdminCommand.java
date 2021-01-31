@@ -166,7 +166,7 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
                 if (!game.isStarted()) {
                     if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
                         if (game.getPlayersPlaying().size() <= numberOfPlayers) {
-                            if (!(game.getPlayersPlaying().size() == game.getNumberOfPlayers())) {
+                            if (!(game.getRed().getPlayersRoles().size() + game.getBlue().getPlayersRoles().size() == game.getNumberOfPlayers())) {
                                 Message.GAME_EDITABLE.send(player);
                                 game.setNumberOfPlayers(numberOfPlayers);
                                 game.loadRolesRemaining();

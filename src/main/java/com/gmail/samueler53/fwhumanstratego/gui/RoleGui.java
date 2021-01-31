@@ -200,6 +200,7 @@ public class RoleGui {
                 game.getScoreboard().updatePlayerRole(uuid);
                 clearPlayer(uuid);
                 player.closeInventory();
+                game.messageRole(uuid);
                 if (game.isSpectateMode(squad)) {
                     game.spectateMode(squad);
                 }

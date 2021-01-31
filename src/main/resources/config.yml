@@ -1,53 +1,39 @@
 roles:
   Generale:
-    description: "E' in grado di uccidere tutti i ruoli tranne la bomba, può essere solamente ucciso da parte di un assassino. Attenzione se il generale muore, automaticamente perdi il round"
+    description: "E' in grado di uccidere tutti i ruoli tranne la bomba, puo' essere solamente ucciso da parte di un assassino. Attenzione se il generale muore, automaticamente perdi il round"
     points: 1500
     max_players: 1
-    can_kill: Maresciallo,Colonnello,Artificiere,Assassino
-    can_be_killed_by: Assassino
-    switch_role: false
+    can_kill: Maresciallo,Colonnello,Maggiore,Artificiere,Assassino
   Assassino:
-    description: "Può uccidere solamente il generale, ma allo stesso tempo può venire ucciso da chiunque"
+    description: "Puo' uccidere solamente il generale, ma allo stesso tempo puo' venire ucciso da chiunque"
     points: 0
     max_players: 1
     can_kill: Generale
-    can_be_killed_by: Generale,Maresciallo,Colonnello,Maggiore,Artificiere
-    switch_role: true
   Bomba:
-    description: "Non è in grado di colpire, ma se viene colpita da tutti gli altri ruoli tranne il generale e l'artificiere essi esploderanno. L'artificiere è l'unico ruolo in grado di disinnescarla "
+    description: "Non e' in grado di colpire, ma se viene colpita da tutti gli altri ruoli tranne il generale e l'artificiere essi esploderanno. L'artificiere e' l'unico ruolo in grado di disinnescarla "
     points: 50
     max_players: 2
     can_kill: Maresciallo,Colonnello,Maggiore,Assassino
-    can_be_killed_by: Artificiere
-    switch_role: true
   Artificiere:
-    description: "Può uccidere solamente la bomba e l'assassino.Può essere uccisa da tutti gli altri ruoli"
+    description: "Puo' uccidere solamente la bomba e l'assassino. Puo' essere uccisa da tutti gli altri ruoli"
     points: 100
     max_players: 2
     can_kill: Bomba,Assassino
-    can_be_killed_by: Generale,Maresciallo,Colonnello,Maggiore
-    switch_role: true
   Maresciallo:
-    description: "Può uccidere il colonnello, il maggiore, l'artificiere e l'assassino. Può morire da tutti gli altri ruoli"
+    description: "Può uccidere il colonnello, il maggiore, l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 300
     max_players: 2
-    can_kill: Colonnello,Artificiere,Assassino
-    can_be_killed_by: Generale
-    switch_role: true
+    can_kill: Colonnello,Maggiore,Artificiere,Assassino
   Colonnello:
-    description: "Può uccidere il maggiore, l'artificiere e l'assassino. Può morire da tutti gli altri ruoli"
+    description: "Puo' uccidere il maggiore, l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 250
     max_players: 3
-    can_kill: Artificiere,Assassino
-    can_be_killed_by: Generale,Maresciallo
-    switch_role: true
+    can_kill: Maggiore,Artificiere,Assassino
   Maggiore:
-    description:  "Può uccidere l'artificiere e l'assassino. Può morire da tutti gli altri ruoli"
+    description:  "Puo' uccidere l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 200
     max_players: 4
     can_kill: Artificiere,Assassino
-    can_be_killed_by: Generale,Maresciallo,Colonnello
-    switch_role: true
 rounds: 4
 delayStartGame: 300
 pointsFromTreasure: 1500
