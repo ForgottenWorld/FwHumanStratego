@@ -53,6 +53,7 @@ public final class FwHumanStratego extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new onPlayerDamagedListener(), this);
         getServer().getPluginManager().registerEvents(new onPlayerDroppingListener(), this);
         getServer().getPluginManager().registerEvents(new onPlayerFoodLevelChangeListener(), this);
+        getServer().getPluginManager().registerEvents(new onPlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new onPlayerInventoryClickListener(), this);
         getServer().getPluginManager().registerEvents(new onPlayerLeftListener(), this);
         getServer().getPluginManager().registerEvents(new onPlayerOpeningInventoriesListener(), this);

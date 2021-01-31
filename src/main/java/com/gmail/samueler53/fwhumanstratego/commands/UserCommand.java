@@ -64,6 +64,7 @@ public class UserCommand implements CommandExecutor {
                 game.getTeamGui().updateGui();
             }
             game.removeAPlayer(uuid);
+            gameManager.getGamesGui().modifyGame(game);
             player.teleport(game.getPlayersLocations().get(uuid));
             game.getPlayersLocations().remove(uuid);
         } else {

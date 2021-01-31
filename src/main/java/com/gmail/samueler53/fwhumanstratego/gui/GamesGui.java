@@ -13,8 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class GamesGui {
     private Gui mainGui;
@@ -45,6 +44,9 @@ public class GamesGui {
         ItemMeta itemMeta = itemStack.getItemMeta();
         assert itemMeta != null;
         itemMeta.setDisplayName(arena.getName());
+        List<String> loreStrings = new ArrayList<>();
+        loreStrings.add(game.getPlayersPlaying().size() + "/" + game.getNumberOfPlayers());
+        itemMeta.setLore(loreStrings);
         itemStack.setItemMeta(itemMeta);
         addGame(itemStack, game);
     }
@@ -62,6 +64,21 @@ public class GamesGui {
         mainGui.update();
     }
 
+    public void modifyGame(Game game) {
+        Collection<GuiItem> items = mainGui.getPanes().get(1).getItems();
+        for (GuiItem guiItem : items) {
+            if (Objects.requireNonNull(guiItem.getItem().getItemMeta()).getDisplayName().equalsIgnoreCase(game.getArena().getName())) {
+                ItemStack itemStack = new ItemStack(Material.NETHERITE_BLOCK);
+                ItemMeta itemMeta = guiItem.getItem().getItemMeta();
+                List<String> loreStrings = new ArrayList<>();
+                loreStrings.add(game.getPlayersPlaying().size() + "/" + game.getNumberOfPlayers());
+                itemMeta.setLore(loreStrings);
+                guiItem.getItem().setItemMeta(itemMeta);
+                mainGui.update();
+            }
+        }
+    }
+
     public void show(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
         assert player != null;
@@ -76,6 +93,7 @@ public class GamesGui {
             game.addAPlayer(uuid);
             game.getPlayersLocations().put(uuid, player.getLocation());
             arenaManager.teleportPlayerToLobby(uuid, game.getArena());
+            modifyGame(game);
             game.clearPlayer(uuid);
             player.closeInventory();
         } else {

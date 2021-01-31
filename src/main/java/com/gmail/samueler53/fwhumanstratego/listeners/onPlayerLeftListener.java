@@ -39,6 +39,10 @@ public class onPlayerLeftListener implements Listener {
                     squad.getRolesRemaining().put(role, squad.getRolesRemaining().get(role) + 1);
                     squad.getPlayersRoles().remove(uuid);
                     squad.getRoleGui().updateGui();
+                    if (game.hasStoleWool(uuid)) {
+                        game.stolenWool(uuid);
+                        Message.GAME_TREASURESAVED.broadcast(game, player.getDisplayName());
+                    }
                 }
             }
             squad.removePlayer(uuid);

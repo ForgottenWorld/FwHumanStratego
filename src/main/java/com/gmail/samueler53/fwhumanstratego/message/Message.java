@@ -18,8 +18,8 @@ public enum Message {
             ChatColor.DARK_GRAY + "]", false),
 
     /* Arena */
-    ARENA_ALREADY_EXISTS(MessageUtils.formatErrorMessage("Un arena chiamata {} non esiste."), true),
-    ARENA_NOT_FOUND(MessageUtils.formatErrorMessage("L'arena {} non e' stata trovata."), true),
+    ARENA_ALREADY_EXISTS(MessageUtils.formatErrorMessage("L'arena chiamata {} esiste gia'."), true),
+    ARENA_NOT_FOUND(MessageUtils.formatErrorMessage("L'arena non e' stata trovata."), true),
     ARENA_CREATED(ChatColor.YELLOW + String.join("", Collections.nCopies(53, "-")) +
             ChatColor.GREEN + "L'arena: " +
             ChatColor.GOLD + "{}" +
