@@ -194,7 +194,7 @@ public class RoleGui {
         if (game.isAbleToUse(role, squad)) {
             if (game.isRemainingARole(role, squad)) {
                 game.addPlayerRole(uuid, role, squad);
-                player.sendTitle("il tuo nuovo ruolo e'", role.getName(), 30, 100, 30);
+                player.sendTitle("Il tuo nuovo ruolo e'", role.getName(), 30, 100, 30);
                 squad.getRolesRemaining().put(role, squad.getRolesRemaining().get(role) - 1);
                 updateGui();
                 game.getScoreboard().updatePlayerRole(uuid);

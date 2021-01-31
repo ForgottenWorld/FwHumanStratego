@@ -149,7 +149,6 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
             game.clearEachPlayer();
             game.getScoreboard().removeScoreboards();
             gameManager.getGamesGui().removeGame(game);
-            Bukkit.broadcastMessage("test");
             gameManager.removeGame(game);
             Message.GAME_STOPPED.send(player);
         } else {
@@ -173,6 +172,7 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
                                 game.loadRolesRemaining();
                                 game.getTeamGui().updateGui();
                                 game.initializeRoleGui();
+                                gameManager.getGamesGui().modifyGame(game);
                                 if (game.isReadyToStart()) {
                                     Message.GAME_ISSTARTING.broadcast(game);
                                     game.start();
