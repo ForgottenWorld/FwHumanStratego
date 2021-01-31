@@ -68,7 +68,6 @@ public class GamesGui {
         Collection<GuiItem> items = mainGui.getPanes().get(1).getItems();
         for (GuiItem guiItem : items) {
             if (Objects.requireNonNull(guiItem.getItem().getItemMeta()).getDisplayName().equalsIgnoreCase(game.getArena().getName())) {
-                ItemStack itemStack = new ItemStack(Material.NETHERITE_BLOCK);
                 ItemMeta itemMeta = guiItem.getItem().getItemMeta();
                 List<String> loreStrings = new ArrayList<>();
                 loreStrings.add(game.getPlayersPlaying().size() + "/" + game.getNumberOfPlayers());

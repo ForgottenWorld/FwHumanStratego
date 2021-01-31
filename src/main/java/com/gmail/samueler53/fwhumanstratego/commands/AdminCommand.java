@@ -148,6 +148,7 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
         game.clearEachPlayer();
         game.getScoreboard().removeScoreboards();
         gameManager.removeGame(game);
+        gameManager.getGamesGui().removeGame(game);
         Message.GAME_STOPPED.send(player);
     }
 
