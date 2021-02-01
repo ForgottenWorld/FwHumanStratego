@@ -118,22 +118,26 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
         Player player = Bukkit.getPlayer(uuid);
         assert player != null;
         try {
-            int numberOfPlayers = Integer.parseInt(value);
-            if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
-                if (arenaManager.locationsSet(arena)) {
-                    if (!gameManager.isArenaBusy(arena)) {
-                        gameManager.startNewGame(arena, numberOfPlayers);
-                        Game game = gameManager.getGameFromArena(arena);
-                        gameManager.message();
-                        gameManager.getGamesGui().createNewGame(arena, game);
+            if (gameManager.getGamesGui().getNumberOfGamesInTheGui() < 9) {
+                int numberOfPlayers = Integer.parseInt(value);
+                if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
+                    if (arenaManager.locationsSet(arena)) {
+                        if (!gameManager.isArenaBusy(arena)) {
+                            gameManager.startNewGame(arena, numberOfPlayers);
+                            Game game = gameManager.getGameFromArena(arena);
+                            gameManager.message();
+                            gameManager.getGamesGui().createNewGame(arena, game);
+                        } else {
+                            Message.GAME_ARENABUSY.send(player);
+                        }
                     } else {
-                        Message.GAME_ARENABUSY.send(player);
+                        Message.GAME_SETPOINTS.send(player);
                     }
                 } else {
-                    Message.GAME_SETPOINTS.send(player);
+                    Message.GAME_ODDPLAYERS.send(player);
                 }
             } else {
-                Message.GAME_ODDPLAYERS.send(player);
+                Message.GAME_NOMOREGAMES.send(player);
             }
         } catch (NumberFormatException exception) {
             Message.GAME_VALUE.send(player);

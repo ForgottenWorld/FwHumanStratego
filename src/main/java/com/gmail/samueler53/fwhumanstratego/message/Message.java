@@ -72,6 +72,7 @@ public enum Message {
     GAME_UNMODIFIABLE2(MessageUtils.formatErrorMessage("Non puoi modificare la partita! La partita sta per iniziare!"), true),
     GAME_STARTED(MessageUtils.formatErrorMessage("Non puoi modificare una partita gia' iniziata!"), true),
     GAME_STOPPED(ChatColor.GREEN + "La partita e' stata stoppata!", true),
+    GAME_NOMOREGAMES(MessageUtils.formatErrorMessage("Non e' possibile creare ulteriori game"), true),
     GAME_ISSTARTING(ChatColor.GREEN + "La partita sta per iniziare", true),
     GAME_JOIN(ChatColor.GREEN + "Sei entrato con successo nella partita!", true);
 

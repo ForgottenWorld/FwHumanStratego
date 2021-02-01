@@ -25,10 +25,10 @@ public class GamesGui {
     }
 
     public Gui prepareGui() {
-        mainGui = new Gui(3, "Games");
+        mainGui = new Gui(1, "Games");
         mainGui.setOnGlobalClick(event -> event.setCancelled(true));
 
-        OutlinePane background = new OutlinePane(0, 0, 9, 3);
+        OutlinePane background = new OutlinePane(0, 0, 9, 1);
         background.addItem(new GuiItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE)));
         background.setRepeat(true);
         mainGui.addPane(background);
@@ -76,6 +76,10 @@ public class GamesGui {
                 mainGui.update();
             }
         }
+    }
+
+    public int getNumberOfGamesInTheGui() {
+        return mainGui.getPanes().get(1).getItems().size();
     }
 
     public void show(UUID uuid) {
