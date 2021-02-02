@@ -14,6 +14,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,9 +115,11 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
         return NameUtil.filterByStart(suggestions, argsIndex);
     }
 
-    private void createGame(String value, Arena arena, UUID uuid) {
+    private void createGame(String value, Arena arena, @NotNull UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         try {
             if (gameManager.getGamesGui().getNumberOfGamesInTheGui() < 9) {
                 int numberOfPlayers = Integer.parseInt(value);
@@ -146,7 +149,9 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
 
     private void stopGame(Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (gameManager.isArenaBusy(arena)) {
             Game game = gameManager.getGameFromArena(arena);
             game.teleportPlayersInPreviouslyLocation();
@@ -162,7 +167,9 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
 
     private void modifyGame(String value, Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (gameManager.isArenaBusy(arena)) {
             Game game = gameManager.getGameFromArena(arena);
             try {
@@ -203,7 +210,9 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
 
     private void info(Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (gameManager.isArenaBusy(arena)) {
             Game game = gameManager.getGameFromArena(arena);
             player.sendMessage(ChatColor.GREEN + "Nome partita: " + arena.getName());

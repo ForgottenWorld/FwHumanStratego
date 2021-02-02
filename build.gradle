@@ -40,6 +40,7 @@ dependencies {
     compileOnly 'com.github.ForgottenWorld.FWEchelon:fwechelon:v0.0.8-alpha2'
     compile 'com.github.stefvanschie.inventoryframework:IF:0.7.2'
     compile 'org.spigotmc:spigot-api:1.16.3-R0.1-SNAPSHOT'
+    compile 'org.jetbrains:annotations:16.0.2'
 }
 
 processResources {

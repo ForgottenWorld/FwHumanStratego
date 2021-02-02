@@ -61,7 +61,9 @@ public class UserCommand implements CommandExecutor {
     private void playerLeave(UUID uuid) {
         Game game = gameManager.getGameWherePlayerPlaying(uuid);
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (!game.isStarted()) {
             Message.GAME_LEAVE.send(player);
             if (game.hasASquad(uuid)) {
@@ -94,7 +96,9 @@ public class UserCommand implements CommandExecutor {
     private void infoRole(UUID uuid, String roleName) {
         Game game = gameManager.getGameWherePlayerPlaying(uuid);
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (game.isStarted()) {
             if (game.getRoleByName(roleName) != null) {
                 Role role = game.getRoleByName(roleName);

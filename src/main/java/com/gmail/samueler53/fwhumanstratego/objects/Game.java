@@ -118,7 +118,9 @@ public class Game {
         clickMessage.setColor(ChatColor.GREEN);
         clickMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs info " + getRoleFromPlayer(uuid).getName()));
         clickMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Clicca per avere informazioni sul tuo ruolo")));
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         player.spigot().sendMessage(clickMessage);
     }
 
@@ -194,7 +196,9 @@ public class Game {
     public void teleportPlayersInPreviouslyLocation() {
         for (UUID uuid : playersLocations.keySet()) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) {
+                return;
+            }
             player.teleport(playersLocations.get(uuid));
         }
     }
@@ -223,14 +227,18 @@ public class Game {
     private void spectatorModeEachPlayer() {
         for (UUID uuid : playersPlaying) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) {
+                return;
+            }
             player.setGameMode(GameMode.SPECTATOR);
         }
     }
 
     public void clearPlayer(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         player.setFoodLevel(20);
         for (PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());
@@ -245,7 +253,9 @@ public class Game {
 
     private void survivalMode(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (player.getGameMode() != GameMode.SURVIVAL) {
             player.setGameMode(GameMode.SURVIVAL);
         }
@@ -255,7 +265,9 @@ public class Game {
     public void stolenWool(UUID uuid) {
         Squad otherSquad = getOtherSquad(getSquadFromPlayer(uuid));
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) {
+            return;
+        }
         if (otherSquad.getTreasure() == Material.BLUE_WOOL) {
             player.getInventory().remove(Material.BLUE_WOOL);
             arenaManager.treasureBlue(arena.getTreasureBlueLocation(), arena);
@@ -269,7 +281,9 @@ public class Game {
         for (UUID uuid : squad.getPlayersRoles().keySet()) {
             if (!hasARole(uuid)) {
                 Player player = Bukkit.getPlayer(uuid);
-                assert player != null;
+                if (player == null) {
+                    return;
+                }
                 player.closeInventory();
                 player.setGameMode(GameMode.SPECTATOR);
             }

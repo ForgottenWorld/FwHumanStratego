@@ -92,7 +92,9 @@ public enum Message {
     public void broadcast(Game game, Object... objects) {
         for (UUID uuid : game.getPlayersPlaying()) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) {
+                return;
+            }
             send(player, objects);
         }
     }

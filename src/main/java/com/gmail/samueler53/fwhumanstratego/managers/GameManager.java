@@ -70,19 +70,11 @@ public class GameManager {
     }
 
     public Game getGameWherePlayerPlaying(UUID uuid) {
-        if (games.stream().anyMatch(Game -> Game.isPlayerPlaying(uuid))) {
-            return games.stream().filter(Game -> Game.isPlayerPlaying(uuid)).findFirst().get();
-        } else {
-            return null;
-        }
+        return games.stream().filter(Game -> Game.isPlayerPlaying(uuid)).findFirst().orElse(null);
     }
 
     public Game getGameFromArena(Arena arena) {
-        if (games.stream().anyMatch(Game -> Game.getArena().equals(arena))) {
-            return games.stream().filter(Game -> Game.getArena().equals(arena)).findFirst().get();
-        } else {
-            return null;
-        }
+        return games.stream().filter(Game -> Game.getArena().equals(arena)).findFirst().orElse(null);
     }
 
     public void removeGame(Game game) {

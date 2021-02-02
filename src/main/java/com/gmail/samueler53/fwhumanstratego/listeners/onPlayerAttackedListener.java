@@ -51,7 +51,9 @@ public class onPlayerAttackedListener implements Listener {
 
     private void winnerThing(UUID uuidWinner, Game game) {
         Player winner = Bukkit.getPlayer(uuidWinner);
-        assert winner != null;
+        if (winner == null) {
+            return;
+        }
         winner.playSound(winner.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 10.0F, 10.0F);
         if (game.isBomb(uuidWinner)) {
             winner.getWorld().createExplosion(winner.getLocation(), 0.0F);
@@ -60,7 +62,9 @@ public class onPlayerAttackedListener implements Listener {
 
     private void looserThing(UUID uuidLooser, Game game) {
         Player looser = Bukkit.getPlayer(uuidLooser);
-        assert looser != null;
+        if (looser == null) {
+            return;
+        }
         Squad hisSquad = game.getSquadFromPlayer(uuidLooser);
         Squad otherSquad = game.getOtherSquad(hisSquad);
         otherSquad.addPoints(game.getRoleFromPlayer(uuidLooser).getPoints());

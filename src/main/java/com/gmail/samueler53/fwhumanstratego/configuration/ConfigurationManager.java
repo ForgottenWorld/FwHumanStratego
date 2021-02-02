@@ -16,7 +16,7 @@ public class ConfigurationManager {
 
     public static ConfigurationManager getInstance() {
         if (configInstance == null) {
-            configInstance = new ConfigurationManager(FwHumanStratego.getPlugin(FwHumanStratego.class));
+            configInstance = new ConfigurationManager(FwHumanStratego.getPlugin());
         }
         return configInstance;
     }
