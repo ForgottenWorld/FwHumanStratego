@@ -52,12 +52,16 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
             UUID uuid = player.getUniqueId();
             if (player.hasPermission("humanstratego.admincommand")) {
                 if (args.length == 1) {
-                    if (args[0].equalsIgnoreCase("arenas")) {
-                        arenaManager.getArenas(player.getUniqueId());
-                    }
-                    if (args[0].equalsIgnoreCase("reload")) {
-                        plugin.reloadDefaultConfig();
-                        Message.GAME_RELOAD.send(player);
+                    switch (args[0]) {
+                        case "arenas": {
+                            arenaManager.getArenas(player.getUniqueId());
+                            break;
+                        }
+                        case "reload": {
+                            plugin.reloadDefaultConfig();
+                            Message.GAME_RELOAD.send(player);
+                            break;
+                        }
                     }
                 }
                 if (args.length >= 2) {
@@ -66,24 +70,34 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
                     }
                     if (arenaManager.getSearchedArena(args[1], player.getUniqueId()) != null) {
                         Arena arena = arenaManager.getSearchedArena(args[1], player.getUniqueId());
-                        if (args[0].equalsIgnoreCase("stop")) {
-                            stopGame(arena, uuid);
-                        }
-                        if (args[0].equalsIgnoreCase("remove")) {
-                            arenaManager.deleteArena(arena, player.getUniqueId());
-                        }
-                        if (args[0].equalsIgnoreCase("set")) {
-                            arenaManager.set(player.getUniqueId(), arena);
-                        }
-                        if (args[0].equalsIgnoreCase("info")) {
-                            info(arena, uuid);
+                        switch (args[0]) {
+                            case "stop": {
+                                stopGame(arena, uuid);
+                                break;
+                            }
+                            case "remove": {
+                                arenaManager.deleteArena(arena, player.getUniqueId());
+                                break;
+                            }
+                            case "set": {
+                                arenaManager.set(player.getUniqueId(), arena);
+                                break;
+                            }
+                            case "info": {
+                                info(arena, uuid);
+                                break;
+                            }
                         }
                         if (args.length == 3) {
-                            if (args[0].equalsIgnoreCase("start")) {
-                                createGame(args[2], arena, uuid);
-                            }
-                            if (args[0].equalsIgnoreCase("modify")) {
-                                modifyGame(args[2], arena, uuid);
+                            switch (args[0]) {
+                                case "start": {
+                                    createGame(args[2], arena, uuid);
+                                    break;
+                                }
+                                case "modify": {
+                                    modifyGame(args[2], arena, uuid);
+                                    break;
+                                }
                             }
                         }
                     } else if (arenaManager.getSearchedArena(args[1], player.getUniqueId()) == null) {

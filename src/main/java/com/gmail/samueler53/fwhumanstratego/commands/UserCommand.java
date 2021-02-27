@@ -23,29 +23,41 @@ public class UserCommand implements CommandExecutor {
             UUID uuid = player.getUniqueId();
             if (player.hasPermission("humanstratego.usercommand")) {
                 if (args.length == 1) {
-                    if (args[0].equalsIgnoreCase("join")) {
-                        if (!gameManager.isPlayerPlaying(uuid).isPresent()) {
-                            playerJoin(uuid);
-                        } else {
-                            Message.GAME_LEAVEGAMEFIRST.send(player);
+                    switch (args[0]) {
+                        case "join": {
+                            if (!gameManager.isPlayerPlaying(uuid).isPresent()) {
+                                playerJoin(uuid);
+                            } else {
+                                Message.GAME_LEAVEGAMEFIRST.send(player);
+                            }
+                            break;
                         }
-                    } else if (args[0].equalsIgnoreCase("leave")) {
-                        if (gameManager.isPlayerPlaying(uuid).isPresent()) {
-                            playerLeave(uuid);
+                        case "leave": {
+                            if (gameManager.isPlayerPlaying(uuid).isPresent()) {
+                                playerLeave(uuid);
+                            }
+                            break;
                         }
-                    } else if (args[0].equalsIgnoreCase("role")) {
-                        if (gameManager.isPlayerPlaying(uuid).isPresent()) {
-                            playerRole(uuid);
+                        case "role": {
+                            if (gameManager.isPlayerPlaying(uuid).isPresent()) {
+                                playerRole(uuid);
+                            }
+                            break;
                         }
                     }
                 } else if (args.length == 2) {
-                    if (args[0].equalsIgnoreCase("join") && args[1].equalsIgnoreCase("team")) {
-                        if (gameManager.isPlayerPlaying(uuid).isPresent()) {
-                            playerJoinTeam(uuid);
+                    switch (args[0]) {
+                        case "join": {
+                            if (gameManager.isPlayerPlaying(uuid).isPresent() && args[1].equalsIgnoreCase("team")) {
+                                playerJoinTeam(uuid);
+                            }
+                            break;
                         }
-                    } else if (args[0].equalsIgnoreCase("info")) {
-                        if (gameManager.isPlayerPlaying(uuid).isPresent()) {
-                            infoRole(uuid, args[1]);
+                        case "info": {
+                            if (gameManager.isPlayerPlaying(uuid).isPresent()) {
+                                infoRole(uuid, args[1]);
+                            }
+                            break;
                         }
                     }
                 }
