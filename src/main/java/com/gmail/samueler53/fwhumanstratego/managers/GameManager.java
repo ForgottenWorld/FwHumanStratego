@@ -16,8 +16,8 @@ import java.util.*;
 
 public class GameManager {
     private static GameManager instance;
-    List<Game> games = new ArrayList<>();
-    GamesGui gamesGui = new GamesGui();
+    final List<Game> games = new ArrayList<>();
+    final GamesGui gamesGui = new GamesGui();
 
     private GameManager() {
         if (instance != null) {
@@ -40,8 +40,7 @@ public class GameManager {
             clickMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs join"));
             clickMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Clicca per giocare")));
             String endMessage = ChatColor.GREEN + String.join("", Collections.nCopies(53, "-"));
-            ComponentBuilder message = new ComponentBuilder();
-            message
+            ComponentBuilder message = new ComponentBuilder()
                     .append(startMessage)
                     .append(clickMessage)
                     .append(endMessage);

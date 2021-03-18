@@ -49,8 +49,8 @@ public enum Message {
     GAME_TEAMWINNER(ChatColor.DARK_PURPLE + "La partita e' terminata, ha vinto il team " + ChatColor.BOLD + "{}", true),
     GAME_ROUNDWINNER(ChatColor.DARK_GREEN + "Il round e' terminato, ha vinto il team " + ChatColor.BOLD + "{}", true),
     GAME_DRAW(ChatColor.GREEN + "La partita e' finita in pareggio", true),
-    GAME_KILLEDBY(ChatColor.GREEN + "Sei stato ucciso da " + "{}", true),
-    GAME_KILLED(ChatColor.GREEN + "Hai ucciso " + "{}", true),
+    // GAME_KILLEDBY(ChatColor.GREEN + "Sei stato ucciso da " + "{}", true),
+    // GAME_KILLED(ChatColor.GREEN + "Hai ucciso " + "{}", true),
     GAME_STEALEDWOOLRED(ChatColor.GREEN + "{}" + " ha rubato la lana del team rosso!", true),
     GAME_STEALEDWOOLBLUE(ChatColor.GREEN + "{}" + " ha rubato la lana del team blu!", true),
     GAME_TREASURESTEALED(ChatColor.GREEN + "Il tesoro e' stato rubato", true),
@@ -99,9 +99,9 @@ public enum Message {
         }
     }
 
-    public void broadcastAll(Object... objects) {
-        Bukkit.broadcastMessage(asString(objects));
-    }
+//    public void broadcastAll(Object... objects) {
+//        Bukkit.broadcastMessage(asString(objects));
+//    }
 
     public String asString(Object... objects) {
         return format(objects);

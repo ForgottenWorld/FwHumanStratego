@@ -8,8 +8,10 @@ import java.util.UUID;
 
 public class LocationSerializable implements Serializable {
     private static transient final long serialVersionUID = 1681012206529286330L;
-    UUID world;
-    int x, y, z;
+    final UUID world;
+    final int x;
+    final int y;
+    final int z;
 
     public LocationSerializable(World world, int x, int y, int z) {
         this.world = world.getUID();

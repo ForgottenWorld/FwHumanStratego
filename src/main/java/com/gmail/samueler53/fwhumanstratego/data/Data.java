@@ -22,15 +22,13 @@ public class Data implements Serializable {
         this.fileName = fileName;
     }
 
-    public boolean saveData() {
+    public void saveData() {
         try {
             BukkitObjectOutputStream out = new BukkitObjectOutputStream(new GZIPOutputStream(new FileOutputStream(fileName)));
             out.writeObject(this);
             out.close();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 

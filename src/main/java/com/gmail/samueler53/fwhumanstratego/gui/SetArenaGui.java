@@ -57,18 +57,18 @@ public class SetArenaGui {
     }
 
     public ItemStack getMaterial(Color color) {
-        ItemStack LeatherChestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-        LeatherArmorMeta meta = (LeatherArmorMeta) LeatherChestplate.getItemMeta();
-        assert meta != null;
+        ItemStack leatherChestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
+        LeatherArmorMeta meta = (LeatherArmorMeta) leatherChestplate.getItemMeta();
+        if (meta == null) return leatherChestplate;
         meta.setColor(color);
-        LeatherChestplate.setItemMeta(meta);
-        return LeatherChestplate;
+        leatherChestplate.setItemMeta(meta);
+        return leatherChestplate;
     }
 
     private ItemStack redTeamItemStack() {
         ItemStack redTeamStack = getMaterial(Color.RED);
         ItemMeta redTeamMeta = redTeamStack.getItemMeta();
-        assert redTeamMeta != null;
+        if (redTeamMeta == null) return redTeamStack;
         redTeamMeta.setDisplayName("Spawn del team rosso");
         redTeamStack.setItemMeta(redTeamMeta);
         return redTeamStack;
@@ -77,7 +77,7 @@ public class SetArenaGui {
     private ItemStack blueTeamItemStack() {
         ItemStack blueTeamStack = getMaterial(Color.BLUE);
         ItemMeta blueTeamMeta = blueTeamStack.getItemMeta();
-        assert blueTeamMeta != null;
+        if (blueTeamMeta == null) return blueTeamStack;
         blueTeamMeta.setDisplayName("Spawn del team blu");
         blueTeamStack.setItemMeta(blueTeamMeta);
         return blueTeamStack;
@@ -86,7 +86,7 @@ public class SetArenaGui {
     private ItemStack treasureRedItemStack() {
         ItemStack treasureRedStack = new ItemStack(Material.RED_WOOL);
         ItemMeta treasureRedMeta = treasureRedStack.getItemMeta();
-        assert treasureRedMeta != null;
+        if (treasureRedMeta == null) return treasureRedStack;
         treasureRedMeta.setDisplayName("Tesoro rosso");
         treasureRedStack.setItemMeta(treasureRedMeta);
         return treasureRedStack;
@@ -95,19 +95,19 @@ public class SetArenaGui {
     private ItemStack treasureBlueItemStack() {
         ItemStack treasureBlueStack = new ItemStack(Material.BLUE_WOOL);
         ItemMeta treasureBlueMeta = treasureBlueStack.getItemMeta();
-        assert treasureBlueMeta != null;
+        if (treasureBlueMeta == null) return treasureBlueStack;
         treasureBlueMeta.setDisplayName("Tesoro blu");
         treasureBlueStack.setItemMeta(treasureBlueMeta);
         return treasureBlueStack;
     }
 
     private ItemStack lobbyItemStack() {
-        ItemStack LobbyStack = new ItemStack(Material.GLASS_PANE);
-        ItemMeta LobbyMeta = LobbyStack.getItemMeta();
-        assert LobbyMeta != null;
+        ItemStack lobbyStack = new ItemStack(Material.GLASS_PANE);
+        ItemMeta LobbyMeta = lobbyStack.getItemMeta();
+        if (LobbyMeta == null) return lobbyStack;
         LobbyMeta.setDisplayName("Lobby");
-        LobbyStack.setItemMeta(LobbyMeta);
-        return LobbyStack;
+        lobbyStack.setItemMeta(LobbyMeta);
+        return lobbyStack;
     }
 
     public void setPlayer(UUID u) {

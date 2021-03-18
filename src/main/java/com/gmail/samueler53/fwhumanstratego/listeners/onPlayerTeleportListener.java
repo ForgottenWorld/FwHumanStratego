@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class onPlayerTeleportListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
@@ -37,22 +37,18 @@ public class onPlayerTeleportListener implements Listener {
 
     private void lobbyTeleport(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         Message.GAME_CHOOSETEAM.send(player);
         TeamGui teamGui = game.getTeamGui();
-        Bukkit.getScheduler().runTaskLater(FwHumanStratego.getPlugin(), () -> {
-            teamGui.show(uuid);
-        }, 1L);
+        Bukkit.getScheduler().runTaskLater(FwHumanStratego.getPlugin(), () -> teamGui.show(uuid), 1L);
     }
 
     private void spawnTeleport(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         Message.GAME_CHOOSEROLE.send(player);
         Squad squad = game.getSquadFromPlayer(uuid);
-        Bukkit.getScheduler().runTaskLater(FwHumanStratego.getPlugin(), () -> {
-            squad.getRoleGui().show(uuid);
-        }, 1L);
+        Bukkit.getScheduler().runTaskLater(FwHumanStratego.getPlugin(), () -> squad.getRoleGui().show(uuid), 1L);
         if (game.isSpectateMode(squad)) {
             player.setGameMode(GameMode.SPECTATOR);
         }
@@ -61,7 +57,7 @@ public class onPlayerTeleportListener implements Listener {
 
     private void selectionRoleEffects(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 2147483647, 250));
         player.setWalkSpeed(0.0F);
         player.setFoodLevel(4);

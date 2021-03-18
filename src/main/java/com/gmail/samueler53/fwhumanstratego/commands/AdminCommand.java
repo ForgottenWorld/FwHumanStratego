@@ -24,8 +24,8 @@ import java.util.UUID;
 public class AdminCommand implements CommandExecutor, TabExecutor {
     private final FwHumanStratego plugin;
     private final List<String> commandRegistry;
-    GameManager gameManager = GameManager.getInstance();
-    ArenaManager arenaManager = ArenaManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
+    final ArenaManager arenaManager = ArenaManager.getInstance();
 
     public AdminCommand(FwHumanStratego plugin) {
         this.commandRegistry = new ArrayList<>();
@@ -46,7 +46,10 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             UUID uuid = player.getUniqueId();
@@ -68,8 +71,8 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
                     if (args[0].equalsIgnoreCase("create")) {
                         arenaManager.createArena(args[1], player.getUniqueId());
                     }
-                    if (arenaManager.getSearchedArena(args[1], player.getUniqueId()) != null) {
-                        Arena arena = arenaManager.getSearchedArena(args[1], player.getUniqueId());
+                    if (arenaManager.getSearchedArena(args[1]) != null) {
+                        Arena arena = arenaManager.getSearchedArena(args[1]);
                         switch (args[0]) {
                             case "stop": {
                                 stopGame(arena, uuid);
@@ -100,7 +103,7 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
                                 }
                             }
                         }
-                    } else if (arenaManager.getSearchedArena(args[1], player.getUniqueId()) == null) {
+                    } else if (arenaManager.getSearchedArena(args[1]) == null) {
                         Message.ARENA_NOT_FOUND.send(Objects.requireNonNull(Bukkit.getPlayer(uuid)));
                     }
                 }
@@ -110,7 +113,10 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender,
+                                      @NotNull Command command,
+                                      @NotNull String alias,
+                                      String[] args) {
         List<String> suggestions = new ArrayList<>();
         String argsIndex = "";
 
@@ -123,7 +129,6 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
 
         if (args.length == 2) {
             argsIndex = args[1];
-
         }
 
         return NameUtil.filterByStart(suggestions, argsIndex);
@@ -135,27 +140,31 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
             return;
         }
         try {
-            if (gameManager.getGamesGui().getNumberOfGamesInTheGui() < 9) {
-                int numberOfPlayers = Integer.parseInt(value);
-                if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
-                    if (arenaManager.locationsSet(arena)) {
-                        if (!gameManager.isArenaBusy(arena)) {
-                            gameManager.startNewGame(arena, numberOfPlayers);
-                            Game game = gameManager.getGameFromArena(arena);
-                            gameManager.message();
-                            gameManager.getGamesGui().createNewGame(arena, game);
-                        } else {
-                            Message.GAME_ARENABUSY.send(player);
-                        }
-                    } else {
-                        Message.GAME_SETPOINTS.send(player);
-                    }
-                } else {
-                    Message.GAME_ODDPLAYERS.send(player);
-                }
-            } else {
+            if (gameManager.getGamesGui().getNumberOfGamesInTheGui() >= 9) {
                 Message.GAME_NOMOREGAMES.send(player);
+                return;
             }
+
+            int numberOfPlayers = Integer.parseInt(value);
+            if (numberOfPlayers % 2 != 0 || numberOfPlayers <= 1) {
+                Message.GAME_ODDPLAYERS.send(player);
+                return;
+            }
+
+            if (!arenaManager.locationsSet(arena)) {
+                Message.GAME_SETPOINTS.send(player);
+                return;
+            }
+
+            if (gameManager.isArenaBusy(arena)) {
+                Message.GAME_ARENABUSY.send(player);
+                return;
+            }
+
+            gameManager.startNewGame(arena, numberOfPlayers);
+            Game game = gameManager.getGameFromArena(arena);
+            gameManager.message();
+            gameManager.getGamesGui().createNewGame(arena, game);
         } catch (NumberFormatException exception) {
             Message.GAME_VALUE.send(player);
         }
@@ -181,52 +190,60 @@ public class AdminCommand implements CommandExecutor, TabExecutor {
 
     private void modifyGame(String value, Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
+
         if (player == null) {
             return;
         }
-        if (gameManager.isArenaBusy(arena)) {
-            Game game = gameManager.getGameFromArena(arena);
-            try {
-                int numberOfPlayers = Integer.parseInt(value);
-                if (!game.isStarted()) {
-                    if (numberOfPlayers % 2 == 0 && numberOfPlayers > 1) {
-                        if (game.getPlayersPlaying().size() <= numberOfPlayers) {
-                            if (!(game.getRed().getPlayersRoles().size() + game.getBlue().getPlayersRoles().size() == game.getNumberOfPlayers())) {
-                                Message.GAME_EDITABLE.send(player);
-                                game.setNumberOfPlayers(numberOfPlayers);
-                                game.loadRolesRemaining();
-                                game.getTeamGui().updateGui();
-                                game.initializeRoleGui();
-                                gameManager.getGamesGui().modifyGame(game);
-                                if (game.isReadyToStart()) {
-                                    Message.GAME_ISSTARTING.broadcast(game);
-                                    game.start();
-                                }
-                            } else {
-                                Message.GAME_UNMODIFIABLE2.send(player);
-                            }
-                        } else {
-                            Message.GAME_UNMODIFIABLE.send(player);
-                        }
-                    } else {
-                        Message.GAME_ODDPLAYERS.send(player);
-                    }
-                } else {
-                    Message.GAME_STARTED.send(player);
-                }
-            } catch (NumberFormatException exception) {
-                Message.GAME_VALUE.send(player);
-            }
-        } else {
+
+        if (!gameManager.isArenaBusy(arena)) {
             Message.GAME_ARENAFREE.send(player);
+            return;
+        }
+
+        Game game = gameManager.getGameFromArena(arena);
+        try {
+            int numberOfPlayers = Integer.parseInt(value);
+            if (game.isStarted()) {
+                Message.GAME_STARTED.send(player);
+                return;
+            }
+
+            if (numberOfPlayers % 2 != 0 || numberOfPlayers <= 1) {
+                Message.GAME_ODDPLAYERS.send(player);
+                return;
+            }
+
+            if (game.getPlayersPlaying().size() > numberOfPlayers) {
+                Message.GAME_UNMODIFIABLE.send(player);
+                return;
+            }
+
+            if (game.getRed().getPlayersRoles().size() + game.getBlue().getPlayersRoles().size() == game.getNumberOfPlayers()) {
+                Message.GAME_UNMODIFIABLE2.send(player);
+                return;
+            }
+
+            Message.GAME_EDITABLE.send(player);
+            game.setNumberOfPlayers(numberOfPlayers);
+            game.loadRolesRemaining();
+            game.getTeamGui().updateGui();
+            game.initializeRoleGui();
+
+            gameManager.getGamesGui().modifyGame(game);
+            if (game.isReadyToStart()) {
+                Message.GAME_ISSTARTING.broadcast(game);
+                game.start();
+            }
+        } catch (NumberFormatException exception) {
+            Message.GAME_VALUE.send(player);
         }
     }
 
     private void info(Arena arena, UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        if (player == null) {
-            return;
-        }
+
+        if (player == null) return;
+
         if (gameManager.isArenaBusy(arena)) {
             Game game = gameManager.getGameFromArena(arena);
             player.sendMessage(ChatColor.GREEN + "Nome partita: " + arena.getName());

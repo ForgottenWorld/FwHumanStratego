@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class onPlayerChattingListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerChatting(AsyncPlayerChatEvent event) {

@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class onPlayerInteractListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEntityEvent event) {

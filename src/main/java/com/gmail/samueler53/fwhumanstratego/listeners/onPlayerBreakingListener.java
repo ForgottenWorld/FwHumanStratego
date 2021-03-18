@@ -8,7 +8,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 public class onPlayerBreakingListener implements Listener{
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerBreaking(BlockBreakEvent event){

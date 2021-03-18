@@ -9,15 +9,19 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class UserCommand implements CommandExecutor {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             UUID uuid = player.getUniqueId();
@@ -105,15 +109,15 @@ public class UserCommand implements CommandExecutor {
         }
     }
 
-    private void infoRole(UUID uuid, String roleName) {
+    private void infoRole(UUID uuid, @NotNull String roleName) {
         Game game = gameManager.getGameWherePlayerPlaying(uuid);
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return;
         }
         if (game.isStarted()) {
-            if (game.getRoleByName(roleName) != null) {
-                Role role = game.getRoleByName(roleName);
+            Role role = game.getRoleByName(roleName);
+            if (role != null) {
                 player.sendMessage(role.getDescription());
             }
         }

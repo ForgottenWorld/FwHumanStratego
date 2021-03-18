@@ -10,14 +10,14 @@ import java.util.*;
 
 public class Scoreboard {
 
-    private static Scoreboard instance;
-    private  Map<UUID, FastBoard> boards;
-    Game game;
+    // private static Scoreboard instance;
+    private final Map<UUID, FastBoard> boards;
+    final Game game;
 
     Scoreboard(Game game) {
-        if (instance != null) {
-            throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
-        }
+//        if (instance != null) {
+//            throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
+//        }
         this.boards = new HashMap<>();
         this.game = game;
     }
@@ -30,7 +30,7 @@ public class Scoreboard {
                     ChatColor.RED + "Fw" +
                     ChatColor.WHITE + "HumanStratego" +
                     ChatColor.DARK_GRAY + "]");
-            assert player != null;
+            if (player == null) return;
             this.boards.put(player.getUniqueId(), board);
         }
     }

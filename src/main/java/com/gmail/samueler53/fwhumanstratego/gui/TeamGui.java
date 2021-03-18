@@ -55,7 +55,7 @@ public class TeamGui {
     private ItemStack redTeamItemStack() {
         ItemStack redTeamStack = new ItemStack(Material.RED_WOOL);
         ItemMeta redTeamMeta = redTeamStack.getItemMeta();
-        assert redTeamMeta != null;
+        if (redTeamMeta == null) return redTeamStack;
         redTeamMeta.setDisplayName("Team Rosso " + game.getRed().getPlayersRoles().size() + "/" + game.getNumberOfPlayers() / 2);
         redTeamStack.setItemMeta(redTeamMeta);
         return redTeamStack;
@@ -64,7 +64,7 @@ public class TeamGui {
     private ItemStack blueTeamItemStack() {
         ItemStack blueTeamStack = new ItemStack(Material.BLUE_WOOL);
         ItemMeta blueTeamMeta = blueTeamStack.getItemMeta();
-        assert blueTeamMeta != null;
+        if (blueTeamMeta == null) return blueTeamStack;
         blueTeamMeta.setDisplayName("Team Blu " + game.getBlue().getPlayersRoles().size() + "/" + game.getNumberOfPlayers() / 2);
         blueTeamStack.setItemMeta(blueTeamMeta);
 
@@ -78,7 +78,7 @@ public class TeamGui {
 
     public void show(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         mainGui.show(player);
     }
 
@@ -89,7 +89,7 @@ public class TeamGui {
     public void chooseTeam(UUID uuid, Squad squad) {
         Squad otherSquad = game.getOtherSquad(squad);
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         if (squad.getPlayersRoles().size() == game.getNumberOfPlayers()/2) {
             Message.GAME_TEAMFULL.send(player);
             return;

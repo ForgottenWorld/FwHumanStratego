@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 public class onPlayerDamagedListener implements Listener {
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerBreaking(EntityDamageEvent event) {

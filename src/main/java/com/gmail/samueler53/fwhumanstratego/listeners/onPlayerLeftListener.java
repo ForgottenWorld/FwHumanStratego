@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class onPlayerLeftListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerLeft(PlayerQuitEvent event) {
@@ -28,7 +28,7 @@ public class onPlayerLeftListener implements Listener {
 
     private void playerLeft(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         Game game = gameManager.getGameWherePlayerPlaying(uuid);
         if (game.hasASquad(uuid)) {
             Squad squad = game.getSquadFromPlayer(uuid);

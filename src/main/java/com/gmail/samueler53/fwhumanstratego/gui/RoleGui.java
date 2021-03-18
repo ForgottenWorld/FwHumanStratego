@@ -17,6 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ import java.util.UUID;
 public class RoleGui {
 
     private Gui mainGui;
-    Game game;
-    Squad squad;
+    final Game game;
+    final Squad squad;
 
     public RoleGui(Squad squad, Game game) {
         this.game = game;
@@ -69,10 +70,11 @@ public class RoleGui {
         mainGui.addPane(rolePane);
     }
 
+    @NotNull
     private ItemStack generaleItemStack() {
         ItemStack generaleStack = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta generaleMeta = generaleStack.getItemMeta();
-        assert generaleMeta != null;
+        if (generaleMeta == null) return generaleStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Generale")).toString() + " volte");
@@ -83,10 +85,11 @@ public class RoleGui {
         return generaleStack;
     }
 
+    @NotNull
     private ItemStack marescialloItemStack() {
         ItemStack marescialloStack = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta marescialloMeta = marescialloStack.getItemMeta();
-        assert marescialloMeta != null;
+        if (marescialloMeta == null) return marescialloStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Maresciallo")).toString() + " volte");
@@ -97,10 +100,11 @@ public class RoleGui {
         return marescialloStack;
     }
 
+    @NotNull
     private ItemStack colonnelloItemStack() {
         ItemStack colonnelloStack = new ItemStack(Material.IRON_SWORD);
         ItemMeta colonnelloMeta = colonnelloStack.getItemMeta();
-        assert colonnelloMeta != null;
+        if (colonnelloMeta == null) return colonnelloStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Colonnello")).toString() + " volte");
@@ -112,10 +116,11 @@ public class RoleGui {
         return colonnelloStack;
     }
 
+    @NotNull
     private ItemStack maggioreItemStack() {
         ItemStack maggioreStack = new ItemStack(Material.STONE_SWORD);
         ItemMeta maggioreMeta = maggioreStack.getItemMeta();
-        assert maggioreMeta != null;
+        if (maggioreMeta == null) return maggioreStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Maggiore")).toString() + " volte");
@@ -127,10 +132,11 @@ public class RoleGui {
         return maggioreStack;
     }
 
+    @NotNull
     private ItemStack artificiereItemStack() {
         ItemStack artificiereStack = new ItemStack(Material.FLINT_AND_STEEL);
         ItemMeta artificiereMeta = artificiereStack.getItemMeta();
-        assert artificiereMeta != null;
+        if (artificiereMeta == null) return artificiereStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Artificiere")).toString() + " volte");
@@ -142,10 +148,11 @@ public class RoleGui {
         return artificiereStack;
     }
 
+    @NotNull
     private ItemStack bombaItemStack() {
         ItemStack bombaStack = new ItemStack(Material.TNT);
         ItemMeta bombaMeta = bombaStack.getItemMeta();
-        assert bombaMeta != null;
+        if (bombaMeta == null) return bombaStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Bomba")).toString() + " volte");
@@ -157,10 +164,11 @@ public class RoleGui {
         return bombaStack;
     }
 
+    @NotNull
     private ItemStack assassinoItemStack() {
         ItemStack assassinoStack = new ItemStack(Material.LEAD);
         ItemMeta assassinoMeta = assassinoStack.getItemMeta();
-        assert assassinoMeta != null;
+        if (assassinoMeta == null) return assassinoStack;
         FileConfiguration config = FwHumanStratego.getDefaultConfig();
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add("Puoi utilizzare questo ruolo ancora " + squad.getRolesRemaining().get(game.getRoleByName("Assassino")).toString() + " volte");
@@ -179,7 +187,7 @@ public class RoleGui {
 
     public void show(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         mainGui.show(player);
     }
 
@@ -187,10 +195,11 @@ public class RoleGui {
         return mainGui.getInventory();
     }
 
-    public void replaceRole(UUID uuid, String roleName) {
+    public void replaceRole(UUID uuid, @NotNull String roleName) {
         Role role = game.getRoleByName(roleName);
+        if (role == null) return;
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         if (game.isAbleToUse(role, squad)) {
             if (game.isRemainingARole(role, squad)) {
                 game.addPlayerRole(uuid, role, squad);
@@ -214,7 +223,7 @@ public class RoleGui {
 
     private void clearPlayer(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         player.setFoodLevel(20);
         for (PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());

@@ -42,7 +42,7 @@ public class GamesGui {
     public void createNewGame(Arena arena, Game game) {
         ItemStack itemStack = new ItemStack(Material.NETHERITE_BLOCK);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        assert itemMeta != null;
+        if (itemMeta == null) return;
         itemMeta.setDisplayName(arena.getName());
         List<String> loreStrings = new ArrayList<>();
         loreStrings.add(game.getPlayersPlaying().size() + "/" + game.getNumberOfPlayers());
@@ -84,13 +84,13 @@ public class GamesGui {
 
     public void show(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         mainGui.show(player);
     }
 
     private void addAPlayer(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         if (game.getNumberOfPlayers() != game.getPlayersPlaying().size()) {
             Message.GAME_JOIN.send(player);
             game.addAPlayer(uuid);

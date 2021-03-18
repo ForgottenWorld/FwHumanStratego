@@ -2,7 +2,6 @@ package com.gmail.samueler53.fwhumanstratego.objects;
 
 import com.gmail.samueler53.fwhumanstratego.gui.RoleGui;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -56,7 +55,7 @@ public class Squad {
 
     public void setKit(Color color) {
         LeatherArmorMeta meta = (LeatherArmorMeta) kit.getItemMeta();
-        assert meta != null;
+        if (meta == null) return;
         meta.setColor(color);
         kit.setItemMeta(meta);
     }
@@ -64,7 +63,7 @@ public class Squad {
     public void equipKitForEachPlayer() {
         for (UUID uuid : playersRoles.keySet()) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) return;
             player.getInventory().setChestplate(kit);
         }
     }

@@ -14,6 +14,8 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -31,7 +33,7 @@ public class Game {
     private final GameManager gameManager = GameManager.getInstance();
     private final Scoreboard scoreboard = new Scoreboard(this);
     private final TeamGui teamGui;
-    FileConfiguration config = FwHumanStratego.getDefaultConfig();
+    final FileConfiguration config = FwHumanStratego.getDefaultConfig();
 
 
     public Game(Arena arena, int numberOfPlayers) {
@@ -292,7 +294,7 @@ public class Game {
 
     public Boolean canKill(Role roleDamageDealer, Role roleDamaged) {
         String value = config.getString("roles." + roleDamageDealer.getName() + ".can_kill");
-        assert value != null;
+        if (value == null) return false;
         String[] s = value.split(",");
         return Arrays.stream(s).anyMatch(String -> String.equalsIgnoreCase(roleDamaged.getName()));
     }
@@ -317,7 +319,7 @@ public class Game {
     public boolean hasStoleWool(UUID uuid) {
         Squad otherSquad = getOtherSquad(getSquadFromPlayer(uuid));
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return false;
         return player.getInventory().contains(otherSquad.getTreasure());
     }
 
@@ -326,15 +328,21 @@ public class Game {
     }
 
     public boolean isReadyToStart() {
-        return numberOfPlayers / 2 == red.getPlayersRoles().size() && numberOfPlayers / 2 == blue.getPlayersRoles().size();
+        return numberOfPlayers / 2 == red.getPlayersRoles().size() &&
+                numberOfPlayers / 2 == blue.getPlayersRoles().size();
     }
 
     private boolean isASpecialRole(Role role) {
-        return role.getName().equalsIgnoreCase("generale") || role.getName().equalsIgnoreCase("assassino") || role.getName().equalsIgnoreCase("bomba") || role.getName().equalsIgnoreCase("artificiere");
+        return role.getName().equalsIgnoreCase("generale") ||
+                role.getName().equalsIgnoreCase("assassino") ||
+                role.getName().equalsIgnoreCase("bomba") ||
+                role.getName().equalsIgnoreCase("artificiere");
     }
 
     private boolean isANormalRole(Role role) {
-        return role.getName().equalsIgnoreCase("maresciallo") || role.getName().equalsIgnoreCase("colonnello") || role.getName().equalsIgnoreCase("maggiore");
+        return role.getName().equalsIgnoreCase("maresciallo") ||
+                role.getName().equalsIgnoreCase("colonnello") ||
+                role.getName().equalsIgnoreCase("maggiore");
     }
 
     public boolean isAbleToUse(Role role, Squad squad) {
@@ -406,12 +414,12 @@ public class Game {
         return getSquadFromPlayer(uuid).getPlayersRoles().get(uuid);
     }
 
-    public Role getRoleByName(String roleName) {
-        if (roles.stream().anyMatch(Role -> Role.name.equalsIgnoreCase(roleName))) {
-            return roles.stream().filter(Role -> Role.name.equalsIgnoreCase(roleName)).findFirst().get();
-        } else {
-            return null;
-        }
+    @Nullable
+    public Role getRoleByName(@NotNull String roleName) {
+        return roles.stream()
+                .filter(r -> r.name.equals(roleName.toLowerCase(Locale.ROOT)))
+                .findFirst()
+                .orElse(null);
     }
 
     public int getPlayerWhoHaveThisRole(Role role, Squad squad) {
@@ -425,40 +433,24 @@ public class Game {
     }
 
     public Squad getSquadFromPlayer(UUID uuid) {
-        if (red.getPlayersRoles().containsKey(uuid)) {
-            return red;
-        } else {
-            return blue;
-        }
+        return red.getPlayersRoles().containsKey(uuid) ? red : blue;
     }
 
     public UUID getWhoLose(UUID uuidDamageDealer, UUID uuidDamaged) {
         Role roleDamageDealer = getRoleFromPlayer(uuidDamageDealer);
         Role roleDamaged = getRoleFromPlayer(uuidDamaged);
-        if (canKill(roleDamageDealer, roleDamaged)) {
-            return uuidDamaged;
-        } else {
-            return uuidDamageDealer;
-        }
+        return canKill(roleDamageDealer, roleDamaged) ? uuidDamaged : uuidDamageDealer;
 
     }
 
     public UUID getWhoWin(UUID uuidDamageDealer, UUID uuidDamaged) {
         Role roleDamageDealer = getRoleFromPlayer(uuidDamageDealer);
         Role roleDamaged = getRoleFromPlayer(uuidDamaged);
-        if (canKill(roleDamageDealer, roleDamaged)) {
-            return uuidDamageDealer;
-        } else {
-            return uuidDamaged;
-        }
+        return canKill(roleDamageDealer, roleDamaged) ? uuidDamageDealer : uuidDamaged;
     }
 
     private Squad getSquadWinner() {
-        if (red.getPoints() > blue.getPoints()) {
-            return red;
-        } else {
-            return blue;
-        }
+        return red.getPoints() > blue.getPoints() ? red : blue;
     }
 
     public Scoreboard getScoreboard() {

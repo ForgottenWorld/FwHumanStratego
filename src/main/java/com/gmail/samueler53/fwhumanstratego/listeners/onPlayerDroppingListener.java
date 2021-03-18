@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 
 public class onPlayerDroppingListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerDropping(PlayerDropItemEvent event){

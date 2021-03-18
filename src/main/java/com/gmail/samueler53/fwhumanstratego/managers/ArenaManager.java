@@ -78,14 +78,14 @@ public class ArenaManager {
     public void teleportRedSquad(Arena arena, Game game) {
         for (UUID uuid : game.getRed().getPlayersRoles().keySet()) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) return;
             player.teleport(arena.getRedTeamLocation());
         }
     }
 
     public void teleportRedPlayer(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         player.teleport(game.getArena().getRedTeamLocation());
 
     }
@@ -93,14 +93,14 @@ public class ArenaManager {
     public void teleportBlueSquad(Arena arena, Game game) {
         for (UUID uuid : game.getBlue().getPlayersRoles().keySet()) {
             Player player = Bukkit.getPlayer(uuid);
-            assert player != null;
+            if (player == null) return;
             player.teleport(arena.getBlueTeamLocation());
         }
     }
 
     public void teleportBluePlayer(UUID uuid, Game game) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         player.teleport(game.getArena().getBlueTeamLocation());
 
     }
@@ -108,7 +108,7 @@ public class ArenaManager {
 
     public void teleportPlayerToLobby(UUID uuid, Arena arena) {
         Player player = Bukkit.getPlayer(uuid);
-        assert player != null;
+        if (player == null) return;
         player.teleport(arena.getLobbyLocation());
     }
 
@@ -127,7 +127,7 @@ public class ArenaManager {
 
     public void treasureRed(Location location, Arena arena) {
         removeChest(arena.getTreasureRedLocation());
-        assert location != null;
+        if (location == null) return;
         location.getBlock().setType(Material.CHEST);
         Block block = location.getBlock();
         if (block.getType() != Material.CHEST) {
@@ -139,7 +139,7 @@ public class ArenaManager {
 
     public void treasureBlue(Location location, Arena arena) {
         removeChest(arena.getTreasureBlueLocation());
-        assert location != null;
+        if (location == null) return;
         location.getBlock().setType(Material.CHEST);
         Block block = location.getBlock();
         if (block.getType() != Material.CHEST) {
@@ -203,22 +203,21 @@ public class ArenaManager {
     public void set(UUID uuid, Arena arena) {
         Player p = Bukkit.getPlayer(uuid);
         SetArenaGui instanceGui = SetArenaGui.getInstance();
-        assert p != null;
+        if (p == null) return;
         instanceGui.setPlayer(p.getUniqueId());
         instanceGui.setArena(arena);
         Gui gui = instanceGui.SetGui();
         gui.show(p);
     }
 
-    public Arena getSearchedArena(String arenaName, UUID uuid) {
-        Optional<Arena> isPresentArena = isPresentArena(arenaName);
-        return isPresentArena.orElse(null);
+    public Arena getSearchedArena(String arenaName) {
+        return isPresentArena(arenaName).orElse(null);
     }
 
     public void getArenas(UUID uuid) {
         Player p = Bukkit.getPlayer(uuid);
         for (Arena arena : arenas) {
-            assert p != null;
+            if (p == null) return;
             Message.ARENA_LIST.send(p, arena.getName());
         }
     }

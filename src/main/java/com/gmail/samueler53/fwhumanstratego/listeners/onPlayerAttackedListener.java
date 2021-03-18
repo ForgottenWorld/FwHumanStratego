@@ -17,8 +17,8 @@ import java.util.UUID;
 
 public class onPlayerAttackedListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
-    ArenaManager arenaManager = ArenaManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
+    final ArenaManager arenaManager = ArenaManager.getInstance();
 
     @EventHandler
     public void onPlayerAttacked(EntityDamageByEntityEvent event) {

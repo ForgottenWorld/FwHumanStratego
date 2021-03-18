@@ -7,7 +7,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 public class onPlayerPlacingListener implements Listener {
 
-    GameManager gameManager = GameManager.getInstance();
+    final GameManager gameManager = GameManager.getInstance();
 
     @EventHandler
     public void onPlayerPlacing(BlockPlaceEvent event) {

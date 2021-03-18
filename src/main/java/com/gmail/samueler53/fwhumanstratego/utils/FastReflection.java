@@ -41,9 +41,9 @@ public final class FastReflection {
         return Class.forName(obcClassName(className));
     }
 
-    public static Optional<Class<?>> obcOptionalClass(String className) {
-        return optionalClass(obcClassName(className));
-    }
+//    public static Optional<Class<?>> obcOptionalClass(String className) {
+//        return optionalClass(obcClassName(className));
+//    }
 
     public static Optional<Class<?>> optionalClass(String className) {
         try {

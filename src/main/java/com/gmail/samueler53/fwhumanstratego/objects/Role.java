@@ -2,9 +2,9 @@ package com.gmail.samueler53.fwhumanstratego.objects;
 
 public class Role {
 
-    String name;
-    int points;
-    String description;
+    final String name;
+    final int points;
+    final String description;
 
     public Role(String name, int points, String description) {
         this.name = name;
