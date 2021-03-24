@@ -32,7 +32,7 @@ Ricarica il file di configurazione.
 ```sh
 /hsa start <nome_arena> <numero_di_player>
 ```
-Avvia una partita con l'arena scelta, viene inserito un numero di player predefinito che una volta raggiunto e nel momento in cui tutti i player selezionano la squadra, permette l'inizio dello scontro.
+Avvia una partita con l'arena scelta, viene inserito un numero di player predefinito che una volta raggiunto e nel momento in cui tutti i player selezionano la teamra, permette l'inizio dello scontro.
 
 ```sh
 /hsa modify <nome_arena> <numero_di_player>
