@@ -13,10 +13,12 @@ class OnPlayerOpenInventoryListener : Listener {
         val player = event.player as? Player ?: return
         val game = GameManager.getGameForPlayer(player) ?: return
         val loc = event.inventory.location
-        if (loc != game.getTeamFromPlayer(player).roleGui.inventory.location &&
+        if (loc != game.getTeamForPlayer(player).roleGui.inventory.location &&
             loc != game.teamGui.inventory.location &&
             loc != game.arena.treasureRedLocation &&
             loc != game.arena.treasureBlueLocation
-        ) event.isCancelled = true
+        ) {
+            event.isCancelled = true
+        }
     }
 }

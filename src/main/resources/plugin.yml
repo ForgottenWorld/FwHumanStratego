@@ -2,6 +2,8 @@ name: FwHumanStratego
 version: @version@
 main: com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 api-version: 1.16
+depend:
+  - FWKotlinDeps
 commands:
   humanstratego:
     permission: humanstratego.usercommand

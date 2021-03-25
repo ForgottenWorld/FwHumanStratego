@@ -8,4 +8,6 @@ data class Role(
     val maxPlayers: Int
 ) {
     lateinit var canKill: Set<Role>
+
+    val displayName = name.capitalize()
 }

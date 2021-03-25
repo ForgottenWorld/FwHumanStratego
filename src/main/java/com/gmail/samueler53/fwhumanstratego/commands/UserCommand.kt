@@ -72,7 +72,7 @@ class UserCommand : CommandExecutor {
         Message.GAME_LEAVE.send(player)
 
         if (game.isPlayerInTeam(player)) {
-            game.getTeamFromPlayer(player).removePlayer(player)
+            game.getTeamForPlayer(player).removePlayer(player)
             game.teamGui.updateGui()
         }
 
@@ -84,7 +84,7 @@ class UserCommand : CommandExecutor {
 
     private fun onPlayerRequestRoleGui(game: Game, player: Player) {
         if (game.isStarted && game.getRoleFromPlayer(player) == null) {
-            game.getTeamFromPlayer(player).roleGui.show(player)
+            game.getTeamForPlayer(player).roleGui.show(player)
         }
     }
 
@@ -96,9 +96,8 @@ class UserCommand : CommandExecutor {
 
     private fun onPlayerRequestRoleInfo(game: Game, player: Player, roleName: String) {
         if (!game.isStarted) return
-        val role = game.getRoleByName(roleName)
-        if (role != null) {
-            player.sendMessage(role.description)
+        game.getRoleByName(roleName)?.let {
+            player.sendMessage(it.description)
         }
     }
 }

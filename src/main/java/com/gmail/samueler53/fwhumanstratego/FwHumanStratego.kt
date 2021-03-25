@@ -14,17 +14,21 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 
 class FwHumanStratego : JavaPlugin() {
+    
     override fun onEnable() {
-        // Plugin startup logic
         plugin = this
         dataLoad()
         loadConfiguration()
-        registerCommands()
-        registerListeners()
-    }
-
-    override fun onDisable() {
-        // Plugin shutdown logic
+        registerCommands()        
+        with (server.pluginManager) {
+            registerEvents(OnPlayerAttackedListener(), plugin)
+            registerEvents(OnPlayerChattingListener(), plugin)
+            registerEvents(InGameActionBlocker(), plugin)
+            registerEvents(OnPlayerInventoryClickListener(), plugin)
+            registerEvents(OnPlayerLeftListener(), plugin)
+            registerEvents(OnPlayerOpenInventoryListener(), plugin)
+            registerEvents(OnPlayerTeleportListener(), plugin)
+        }
     }
 
     private fun loadConfiguration() {
@@ -43,21 +47,13 @@ class FwHumanStratego : JavaPlugin() {
         getCommand("humanstrategoadmin")!!.setExecutor(AdminCommand(this))
     }
 
-    private fun registerListeners() {
-        server.pluginManager.registerEvents(OnPlayerAttackedListener(), this)
-        server.pluginManager.registerEvents(OnPlayerChattingListener(), this)
-        server.pluginManager.registerEvents(InGameActionBlocker(), this)
-        server.pluginManager.registerEvents(OnPlayerInventoryClickListener(), this)
-        server.pluginManager.registerEvents(OnPlayerLeftListener(), this)
-        server.pluginManager.registerEvents(OnPlayerOpenInventoryListener(), this)
-        server.pluginManager.registerEvents(OnPlayerTeleportListener(), this)
-    }
-
     private fun dataLoad() {
-        data = Data.loadData(dataFolder.path + "/Saved.data")
+        data = Data.load()
     }
 
     companion object {
+        val dataSavePath get() = "${plugin.dataFolder.path}/saved.yml"
+
         lateinit var defaultConfig: FileConfiguration
         lateinit var data: Data
         lateinit var plugin: FwHumanStratego

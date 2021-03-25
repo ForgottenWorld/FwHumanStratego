@@ -25,10 +25,8 @@ class InGameActionBlocker : Listener {
 
     @EventHandler
     fun onPlayerDamaged(event: EntityDamageEvent) {
-        cancelEventIfPlayerInGame(
-            event.entity as? Player ?: return,
-            event
-        )
+        val player = event.entity as? Player ?: return
+        cancelEventIfPlayerInGame(player, event)
     }
 
     @EventHandler
@@ -43,10 +41,8 @@ class InGameActionBlocker : Listener {
 
     @EventHandler
     fun onPlayerFoodLevelChange(event: FoodLevelChangeEvent) {
-        cancelEventIfPlayerInGame(
-            event.entity as? Player ?: return,
-            event
-        )
+        val player = event.entity as? Player ?: return
+        cancelEventIfPlayerInGame(player, event)
     }
 
     @EventHandler

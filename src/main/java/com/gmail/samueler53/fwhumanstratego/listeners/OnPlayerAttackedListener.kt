@@ -56,8 +56,8 @@ class OnPlayerAttackedListener : Listener {
         }
     }
 
-    private fun looserThing(loser: Player, game: Game?) {
-        val hisTeam = game!!.getTeamFromPlayer(loser)
+    private fun looserThing(loser: Player, game: Game) {
+        val hisTeam = game.getTeamForPlayer(loser)
         val otherTeam = game.getOtherTeam(hisTeam)
         otherTeam.addPoints(game.getRoleFromPlayer(loser)!!.points)
         game.scoreboard.removeScoreboardForPlayer(loser)

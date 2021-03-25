@@ -3,13 +3,12 @@ package com.gmail.samueler53.fwhumanstratego.gui
 import com.github.stefvanschie.inventoryframework.Gui
 import com.github.stefvanschie.inventoryframework.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
-import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 import com.gmail.samueler53.fwhumanstratego.message.Message
 import com.gmail.samueler53.fwhumanstratego.objects.Game
+import com.gmail.samueler53.fwhumanstratego.objects.Role
 import com.gmail.samueler53.fwhumanstratego.objects.Team
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
@@ -41,183 +40,77 @@ class RoleGui(private val team: Team, val game: Game) {
         val bombaStack = bombaItemStack()
         val assassinoStack = assassinoItemStack()
         mainGui.setOnOutsideClick { event: InventoryClickEvent -> event.isCancelled = true }
-        rolePane.addItem(GuiItem(generaleStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "generale")
+        rolePane.addItem(GuiItem(generaleStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "generale")
         })
-        rolePane.addItem(GuiItem(marescialloStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "maresciallo")
+        rolePane.addItem(GuiItem(marescialloStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "maresciallo")
         })
-        rolePane.addItem(GuiItem(colonnelloStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "colonnello")
+        rolePane.addItem(GuiItem(colonnelloStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "colonnello")
         })
-        rolePane.addItem(GuiItem(maggioreStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "maggiore")
+        rolePane.addItem(GuiItem(maggioreStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "maggiore")
         })
-        rolePane.addItem(GuiItem(artificiereStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "artificiere")
+        rolePane.addItem(GuiItem(artificiereStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "artificiere")
         })
-        rolePane.addItem(GuiItem(bombaStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "bomba")
+        rolePane.addItem(GuiItem(bombaStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "bomba")
         })
-        rolePane.addItem(GuiItem(assassinoStack) { event: InventoryClickEvent ->
-            replaceRole(event.whoClicked as? Player ?: return@GuiItem, "assassino")
+        rolePane.addItem(GuiItem(assassinoStack) {
+            replaceRole(it.whoClicked as? Player ?: return@GuiItem, "assassino")
         })
         mainGui.addPane(rolePane)
     }
 
-    private fun generaleItemStack(): ItemStack {
-        val generaleStack = ItemStack(Material.NETHERITE_SWORD)
-        val generaleMeta = generaleStack.itemMeta ?: return generaleStack
-        val config: FileConfiguration = FwHumanStratego.defaultConfig
-        val loreStrings = mutableListOf<String>()
-        loreStrings.add(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Generale")]
-            } volte"
-        )
-        loreStrings.add(
-            "Ci possono essere altri ${
-                config.getInt("roles.Generale.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName("Generale")!!,
-                    team
+    private fun getRoleItemStack(role: Role, material: Material): ItemStack {
+        val remaining = team.rolesRemaining[role]
+        val left = role.maxPlayers - game.countPlayersWithRole(role, team)
+        return ItemStack(material).apply {
+            itemMeta = itemMeta?.apply {
+                lore = listOf(
+                    "Puoi utilizzare questo ruolo ancora $remaining volte",
+                    "Ce ne possono essere altri $left in gioco"
                 )
-            } generali in gioco"
-        )
-        generaleMeta.lore = loreStrings
-        generaleMeta.setDisplayName("Generale")
-        generaleStack.itemMeta = generaleMeta
-        return generaleStack
+                setDisplayName(role.displayName)
+            }
+        }
+    }
+
+    private fun generaleItemStack(): ItemStack {
+        val generale by game.roles()
+        return getRoleItemStack(generale, Material.NETHERITE_SWORD)
     }
 
     private fun marescialloItemStack(): ItemStack {
-        val marescialloStack = ItemStack(Material.DIAMOND_SWORD)
-        val marescialloMeta = marescialloStack.itemMeta ?: return marescialloStack
-        val config = FwHumanStratego.defaultConfig
-        val loreStrings = listOf(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Maresciallo")]
-            } volte",
-            "Ci possono essere altri ${
-                config.getInt("roles.Maresciallo.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName("Maresciallo")!!,
-                    team
-                )
-            } marescialli in gioco"
-        )
-        marescialloMeta.lore = loreStrings
-        marescialloMeta.setDisplayName("Maresciallo")
-        marescialloStack.itemMeta = marescialloMeta
-        return marescialloStack
+        val maresciallo by game.roles()
+        return getRoleItemStack(maresciallo, Material.DIAMOND_SWORD)
     }
 
     private fun colonnelloItemStack(): ItemStack {
-        val colonnelloStack = ItemStack(Material.IRON_SWORD)
-        val colonnelloMeta = colonnelloStack.itemMeta ?: return colonnelloStack
-        val config = FwHumanStratego.defaultConfig
-        val loreStrings = listOf(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Colonnello")]
-            } volte",
-            "Ci possono essere altri ${
-                config.getInt("roles.Colonnello.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName("Colonnello")!!,
-                    team
-                )
-            } colonnelli in gioco"
-        )
-        colonnelloMeta.lore = loreStrings
-        colonnelloMeta.setDisplayName("Colonnello")
-        colonnelloStack.itemMeta = colonnelloMeta
-        return colonnelloStack
+        val colonnello by game.roles()
+        return getRoleItemStack(colonnello, Material.IRON_SWORD)
     }
 
     private fun maggioreItemStack(): ItemStack {
-        val maggioreStack = ItemStack(Material.STONE_SWORD)
-        val maggioreMeta = maggioreStack.itemMeta ?: return maggioreStack
-        val loreStrings = mutableListOf<String>()
-        loreStrings.add(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Maggiore")]
-            } volte"
-        )
-        loreStrings.add(
-            "Ci possono essere altri ${
-                FwHumanStratego.defaultConfig.getInt("roles.Maggiore.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName(
-                        "Maggiore"
-                    )!!, team
-                )
-            } maggiori in gioco"
-        )
-        maggioreMeta.lore = loreStrings
-        maggioreMeta.setDisplayName("Maggiore")
-        maggioreStack.itemMeta = maggioreMeta
-        return maggioreStack
+        val maggiore by game.roles()
+        return getRoleItemStack(maggiore, Material.STONE_SWORD)
     }
 
     private fun artificiereItemStack(): ItemStack {
-        val artificiereStack = ItemStack(Material.FLINT_AND_STEEL)
-        val artificiereMeta = artificiereStack.itemMeta ?: return artificiereStack
-        val config: FileConfiguration = FwHumanStratego.defaultConfig
-        val loreStrings = mutableListOf<String>()
-        loreStrings.add(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Artificiere")]
-            } volte"
-        )
-        loreStrings.add(
-            "Ci possono essere altri ${
-                config.getInt("roles.Artificiere.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName("Artificiere")!!,
-                    team
-                )
-            } artificieri in gioco"
-        )
-        artificiereMeta.lore = loreStrings
-        artificiereMeta.setDisplayName("Artificiere")
-        artificiereStack.itemMeta = artificiereMeta
-        return artificiereStack
+        val artificiere by game.roles()
+        return getRoleItemStack(artificiere, Material.FLINT_AND_STEEL)
     }
 
     private fun bombaItemStack(): ItemStack {
-        val bombaStack = ItemStack(Material.TNT)
-        val bombaMeta = bombaStack.itemMeta ?: return bombaStack
-        val config: FileConfiguration = FwHumanStratego.defaultConfig
-        val loreStrings = mutableListOf<String>()
-        loreStrings.add(
-            "Puoi utilizzare questo ruolo ancora ${
-                team.rolesRemaining[game.getRoleByName("Bomba")]
-            } volte"
-        )
-        loreStrings.add(
-            "Ci possono essere altri ${
-                config.getInt("roles.Bomba.max_players") - game.getPlayerWhoHaveThisRole(
-                    game.getRoleByName("Bomba")!!,
-                    team
-                )
-            } bombe in gioco"
-        )
-        bombaMeta.lore = loreStrings
-        bombaMeta.setDisplayName("Bomba")
-        bombaStack.itemMeta = bombaMeta
-        return bombaStack
+        val bomba by game.roles()
+        return getRoleItemStack(bomba, Material.TNT)
     }
 
     private fun assassinoItemStack(): ItemStack {
-        val loreStrings = mutableListOf<String>()
-        val roleName = team.rolesRemaining[game.getRoleByName("Assassino")]
-        loreStrings.add(
-            "Puoi utilizzare questo ruolo ancora $roleName volte"
-        )
-        val left = FwHumanStratego.defaultConfig.getInt("roles.Assassino.max_players") -
-            game.getPlayerWhoHaveThisRole(game.getRoleByName("Assassino")!!, team)
-        loreStrings.add("Ci possono essere altri $left assassini in gioco")
-        val assassinoStack = ItemStack(Material.LEAD)
-        assassinoStack.itemMeta = assassinoStack.itemMeta?.apply {
-            lore = loreStrings
-            setDisplayName("Assassino")
-        }
-        return assassinoStack
+        val assassino by game.roles()
+        return getRoleItemStack(assassino, Material.LEAD)
     }
 
     fun updateGui() {

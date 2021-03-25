@@ -15,19 +15,13 @@ import java.util.*
 
 class GamesGui {
 
-    private var mainGui = prepareGui()
-
-    private fun prepareGui(): Gui {
-        mainGui = Gui(1, "Games").apply {
-            setOnGlobalClick { event: InventoryClickEvent -> event.isCancelled = true }
-            addPane(OutlinePane(0, 0, 9, 1).apply {
-                addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
-                setRepeat(true)
-            })
-            addPane(OutlinePane(0, 0, 9, 1))
-        }
-
-        return mainGui
+    private val mainGui = Gui(1, "Games").apply {
+        setOnGlobalClick { it.isCancelled = true }
+        addPane(OutlinePane(0, 0, 9, 1).apply {
+            addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+            setRepeat(true)
+        })
+        addPane(OutlinePane(0, 0, 9, 1))
     }
 
     fun createNewGame(arena: Arena, game: Game) {

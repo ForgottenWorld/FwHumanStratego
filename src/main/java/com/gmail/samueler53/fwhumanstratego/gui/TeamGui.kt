@@ -8,39 +8,37 @@ import com.gmail.samueler53.fwhumanstratego.objects.Game
 import com.gmail.samueler53.fwhumanstratego.objects.Team
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 class TeamGui(private val game: Game) {
 
-    private var mainGui = prepareGui()
+    private var mainGui = Gui(3, "TeamsGui").apply {
+        setOnGlobalClick { it.isCancelled = true }
+        addPane(OutlinePane(0, 0, 9, 3).apply {
+            addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
+            setRepeat(true)
+        })
+    }
 
-    private fun prepareGui(): Gui {
-        mainGui = Gui(3, "TeamsGui")
-        mainGui.setOnGlobalClick { event: InventoryClickEvent -> event.isCancelled = true }
-        val background = OutlinePane(0, 0, 9, 3)
-        background.addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
-        background.setRepeat(true)
-        mainGui.addPane(background)
+    init {
         addItemStack()
-        return mainGui
     }
 
     private fun addItemStack() {
-        val redTeamPane = OutlinePane(3, 1, 1, 1)
-        val blueTeamPane = OutlinePane(5, 1, 6, 1)
-        val redTeamItemStack = redTeamItemStack()
-        val blueTeamItemStack = blueTeamItemStack()
-        mainGui.setOnOutsideClick { event: InventoryClickEvent -> event.isCancelled = true }
-        redTeamPane.addItem(GuiItem(redTeamItemStack) {
-            chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.redTeam)
-        })
-        blueTeamPane.addItem(GuiItem(blueTeamItemStack) {
-            chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.blueTeam)
-        })
-        mainGui.addPane(redTeamPane)
-        mainGui.addPane(blueTeamPane)
+        with (mainGui) {
+            setOnOutsideClick { it.isCancelled = true }
+            addPane(OutlinePane(3, 1, 1, 1).apply {
+                addItem(GuiItem(redTeamItemStack()) {
+                    chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.redTeam)
+                })
+            })
+            addPane(OutlinePane(5, 1, 6, 1).apply {
+                addItem(GuiItem(blueTeamItemStack()) {
+                    chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.blueTeam)
+                })
+            })
+        }
     }
 
     private fun redTeamItemStack() = ItemStack(Material.RED_WOOL).apply {

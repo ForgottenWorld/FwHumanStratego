@@ -17,10 +17,10 @@ import org.bukkit.inventory.ItemStack
 object ArenaManager {
 
     fun createArena(name: String, player: Player) {
-        if (FwHumanStratego.data.arene.none { it.name.equals(name, ignoreCase = true) }) {
-            FwHumanStratego.data.arene.add(Arena(name))
+        if (FwHumanStratego.data.arenas.none { it.name.equals(name, ignoreCase = true) }) {
+            FwHumanStratego.data.arenas.add(Arena(name))
             Message.ARENA_CREATED.send(player, name)
-            FwHumanStratego.data.arene = FwHumanStratego.data.arene
+            FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
         } else {
             Message.ARENA_ALREADY_EXISTS.send(player, name)
         }
@@ -41,9 +41,9 @@ object ArenaManager {
     fun deleteArena(arena: Arena, player: Player) {
         removeChest(arena.redTeamLocation!!)
         removeChest(arena.blueTeamLocation!!)
-        FwHumanStratego.data.arene.remove(arena)
+        FwHumanStratego.data.arenas.remove(arena)
         Message.ARENA_REMOVE.send(player)
-        FwHumanStratego.data.arene = FwHumanStratego.data.arene
+        FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
     }
 
     fun teleportTeams(arena: Arena, game: Game) {
@@ -76,7 +76,7 @@ object ArenaManager {
     }
 
     fun teleportPlayerToHisSpawnPoint(player: Player, game: Game) {
-        if (game.getTeamFromPlayer(player).type == Team.Type.RED) {
+        if (game.getTeamForPlayer(player).type == Team.Type.RED) {
             teleportRedPlayer(player, game)
         } else {
             teleportBluePlayer(player, game)
@@ -150,7 +150,7 @@ object ArenaManager {
         arena.treasureBlueLocation = loc
 
         Message.ARENA_CREATION_TREASUREBLUE.send(player)
-        FwHumanStratego.data.arene = FwHumanStratego.data.arene
+        FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
         player.closeInventory()
     }
 
@@ -188,10 +188,10 @@ object ArenaManager {
         SetArenaGui.showToPlayer(player, arena)
     }
 
-    fun findArenaByName(arenaName: String) = FwHumanStratego.data.arene.find { it.name == arenaName }
+    fun findArenaByName(arenaName: String) = FwHumanStratego.data.arenas.find { it.name == arenaName }
 
     fun sendArenaListToPlayer(player: Player) {
-        for (arena in FwHumanStratego.data.arene) {
+        for (arena in FwHumanStratego.data.arenas) {
             Message.ARENA_LIST.send(player, arena.name)
         }
     }

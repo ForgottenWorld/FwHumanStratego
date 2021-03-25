@@ -5,6 +5,8 @@ import com.gmail.samueler53.fwhumanstratego.gui.TeamGui
 import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
 import com.gmail.samueler53.fwhumanstratego.message.Message
+import com.gmail.samueler53.fwhumanstratego.utils.launch
+import kotlinx.coroutines.delay
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
@@ -16,13 +18,14 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import java.util.*
+import kotlin.properties.ReadOnlyProperty
 
 class Game(
     val arena: Arena,
     var numberOfPlayers: Int
 ) {
 
-    val playersPlaying = mutableListOf<UUID>()
+    val playersPlaying = mutableSetOf<UUID>()
 
     private val roles = mutableListOf<Role>()
 
@@ -140,21 +143,18 @@ class Game(
     }
 
     fun start() {
-        Bukkit.getScheduler().runTaskLater(
-            FwHumanStratego.plugin,
-            Runnable {
-                isStarted = true
-                rounds++
-                initializeRoleGui()
-                survivalModeEachPlayer()
-                ArenaManager.teleportTeams(arena, this)
-                equipKits()
-                scoreboard.initScoreboards()
-                ArenaManager.initializeArena(arena)
-                GameManager.gamesGui.removeGame(this)
-            },
-            FwHumanStratego.defaultConfig.getInt("delayStartGame").toLong()
-        )
+        launch {
+            delay(FwHumanStratego.defaultConfig.getInt("delayStartGame").toLong())
+            isStarted = true
+            rounds++
+            initializeRoleGui()
+            survivalModeEachPlayer()
+            ArenaManager.teleportTeams(arena, this@Game)
+            equipKits()
+            scoreboard.initScoreboards()
+            ArenaManager.initializeArena(arena)
+            GameManager.gamesGui.removeGame(this@Game)
+        }
     }
 
     private fun equipKits() {
@@ -253,7 +253,7 @@ class Game(
     }
 
     fun stolenWool(player: Player) {
-        val otherTeam = getOtherTeam(getTeamFromPlayer(player))
+        val otherTeam = getOtherTeam(getTeamForPlayer(player))
         if (otherTeam.treasure == Material.BLUE_WOOL) {
             player.inventory.remove(Material.BLUE_WOOL)
             ArenaManager.treasureBlue(arena.treasureBlueLocation!!, arena)
@@ -278,15 +278,15 @@ class Game(
     fun areInTheSameTeam(
         player1: Player,
         player2: Player
-    ) = getTeamFromPlayer(player1) == getTeamFromPlayer(player2)
+    ) = getTeamForPlayer(player1) == getTeamForPlayer(player2)
 
     fun isPlayerInTeam(player: Player) = redTeam.playersRoles.containsKey(player.uniqueId) ||
         blueTeam.playersRoles.containsKey(player.uniqueId)
 
-    private fun hasPlayerRole(player: Player) = getTeamFromPlayer(player).playersRoles[player.uniqueId] != null
+    private fun hasPlayerRole(player: Player) = getTeamForPlayer(player).playersRoles[player.uniqueId] != null
 
     fun hasStoleWool(player: Player): Boolean {
-        val otherTeam = getOtherTeam(getTeamFromPlayer(player))
+        val otherTeam = getOtherTeam(getTeamForPlayer(player))
         return player.inventory.contains(otherTeam.treasure)
     }
 
@@ -310,11 +310,11 @@ class Game(
 
     fun onPlayerLeave(player: Player) {
         if (isPlayerInTeam(player)) {
-            val team = getTeamFromPlayer(player)
+            val team = getTeamForPlayer(player)
             if (isStarted) {
                 Message.GAME_DESERTER.broadcast(this, player.displayName)
-                if (hasPlayerRole(player)) {
-                    val role = getRoleFromPlayer(player)!!
+                val role = getRoleFromPlayer(player)
+                if (role != null) {
                     team.rolesRemaining[role] = team.rolesRemaining[role]!! + 1
                     team.playersRoles.remove(player.uniqueId)
                     team.roleGui.updateGui()
@@ -333,9 +333,9 @@ class Game(
         playersLocations.remove(player.uniqueId)
     }
 
-    fun isRoleAvailableForTeam(role: Role, team: Team) = getPlayerWhoHaveThisRole(role, team) < role.maxPlayers
+    fun isRoleAvailableForTeam(role: Role, team: Team) = countPlayersWithRole(role, team) < role.maxPlayers
 
-    fun isRemainingARole(role: Role?, team: Team) = team.rolesRemaining[role]!! > 0
+    fun isRemainingARole(role: Role, team: Team) = team.rolesRemaining[role]!! > 0
 
     fun isGeneral(player: Player) = getRoleFromPlayer(player)
         ?.name
@@ -351,24 +351,24 @@ class Game(
 
     private fun isDraw() = redTeam.points == blueTeam.points
 
-    fun getOtherTeam(team: Team) = if (team == redTeam) {
-        blueTeam
-    } else {
-        redTeam
-    }
+    fun getOtherTeam(team: Team) = if (team == redTeam) blueTeam else redTeam
 
-    fun getRoleFromPlayer(player: Player) = getTeamFromPlayer(player).playersRoles[player.uniqueId]
+    fun getRoleFromPlayer(player: Player) = getTeamForPlayer(player).playersRoles[player.uniqueId]
+
+    fun <T> roles() = ReadOnlyProperty<T, Role> { _, property ->
+        getRoleByName(property.name)!!
+    }
 
     fun getRoleByName(roleName: String) = roles.find { it.name.equals(roleName, ignoreCase = true) }
 
-    fun getPlayerWhoHaveThisRole(
+    fun countPlayersWithRole(
         role: Role,
         team: Team
     ) = team.playersRoles.count { (_, v) ->
         v == role
     }
 
-    fun getTeamFromPlayer(player: Player) = if (redTeam.playersRoles.containsKey(player.uniqueId)) redTeam else blueTeam
+    fun getTeamForPlayer(player: Player) = if (redTeam.playersRoles.containsKey(player.uniqueId)) redTeam else blueTeam
 
     fun getWhoLose(damageDealer: Player, damaged: Player): Player {
         val roleDamageDealer = getRoleFromPlayer(damageDealer)!!

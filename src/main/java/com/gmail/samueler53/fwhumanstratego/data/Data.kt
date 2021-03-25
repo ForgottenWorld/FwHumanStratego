@@ -1,51 +1,38 @@
 package com.gmail.samueler53.fwhumanstratego.data
 
+import com.charleskorn.kaml.Yaml
+import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 import com.gmail.samueler53.fwhumanstratego.objects.Arena
-import org.bukkit.util.io.BukkitObjectInputStream
-import org.bukkit.util.io.BukkitObjectOutputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import com.gmail.samueler53.fwhumanstratego.utils.launchAsync
+import kotlinx.serialization.builtins.ListSerializer
+import java.io.File
 import java.io.IOException
-import java.io.Serializable
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
 
-class Data(@field:Transient private var fileName: String) : Serializable {
+class Data(arenas: List<Arena>) {
 
-    var arene = mutableListOf<Arena>()
+    var arenas = arenas.toMutableList()
         set(value) {
             field = value
             saveData()
         }
 
-    fun saveData() {
-        try {
-            BukkitObjectOutputStream(GZIPOutputStream(FileOutputStream(fileName))).use {
-                it.writeObject(this)
+    private fun saveData() {
+        val saveData = Yaml.default.encodeToString(ListSerializer(Arena.serializer()), arenas)
+        launchAsync {
+            try {
+                File(FwHumanStratego.dataSavePath).writeText(saveData)
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 
     companion object {
 
-        @Transient
-        private val serialVersionUID = 1681012206529286330L
-
-        fun loadData(filePath: String) = try {
-            BukkitObjectInputStream(
-                GZIPInputStream(FileInputStream(filePath))
-            ).use {
-                it.readObject() as Data
-            }.apply {
-                fileName = filePath
-                saveData()
-            }
-        } catch (e: ClassNotFoundException) {
-            Data(filePath)
-        } catch (e: IOException) {
-            Data(filePath)
+        fun load(): Data {
+            val serialized = File(FwHumanStratego.dataSavePath).readText()
+            val deserialized = Yaml.default.decodeFromString(ListSerializer(Arena.serializer()), serialized)
+            return Data(deserialized)
         }
     }
 }

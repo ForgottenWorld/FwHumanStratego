@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 object SetArenaGui {
 
     fun showToPlayer(player: Player, arena: Arena) {
-        with (Gui(3, "Role")) {
+        with(Gui(3, "Role")) {
             setOnGlobalClick { it.isCancelled = true }
 
             val background = OutlinePane(0, 0, 9, 3).apply {
@@ -25,11 +25,11 @@ object SetArenaGui {
             addPane(background)
 
             addPane(OutlinePane(2, 1, 5, 1).apply {
-                addItem(GuiItem(redTeamItemStack()) {
+                addItem(GuiItem(redTeamSpawnItemStack) {
                     ArenaManager.setRedTeamLocation(player.location, arena, player)
                 })
 
-                addItem(GuiItem(blueTeamItemStack()) {
+                addItem(GuiItem(blueTeamSpawnItemStack) {
                     ArenaManager.setBlueTeamLocation(player.location, arena, player)
                 })
 
@@ -42,30 +42,26 @@ object SetArenaGui {
                 })
 
                 addItem(GuiItem(lobbyItemStack()) {
-                ArenaManager.setLobbyLocation(player.location, arena, player)
+                    ArenaManager.setLobbyLocation(player.location, arena, player)
                 })
             })
             show(player)
         }
     }
 
-    private fun getMaterial(color: Color?) = ItemStack(Material.LEATHER_CHESTPLATE).apply {
+    private fun getTeamSpawnItemStack(
+        color: Color,
+        displayName: String
+    ) = ItemStack(Material.LEATHER_CHESTPLATE).apply {
         itemMeta = (itemMeta as LeatherArmorMeta).apply {
+            setDisplayName(displayName)
             setColor(color)
         }
     }
 
-    private fun redTeamItemStack() = getMaterial(Color.RED).apply {
-        itemMeta = itemMeta?.apply {
-            setDisplayName("Spawn del team rosso")
-        }
-    }
+    private val redTeamSpawnItemStack get() = getTeamSpawnItemStack(Color.RED, "Spawn del team rosso")
 
-    private fun blueTeamItemStack() = getMaterial(Color.BLUE).apply {
-        itemMeta = itemMeta?.apply {
-            setDisplayName("Spawn del team blu")
-        }
-    }
+    private val blueTeamSpawnItemStack get() = getTeamSpawnItemStack(Color.BLUE, "Spawn del team blu")
 
     private fun treasureRedItemStack() = ItemStack(Material.RED_WOOL).apply {
         itemMeta = itemMeta?.apply {

@@ -51,12 +51,10 @@ object GameManager {
 
     fun isArenaBusy(arena: Arena) = games.any { it.arena == arena }
 
-    fun areInTheSameGame(player1: Player, player2: Player) =
-        if (this.getGameForPlayer(player1) != null && this.getGameForPlayer(player2) != null) {
-            this.getGameForPlayer(player1) == this.getGameForPlayer(player2)
-        } else {
-            false
-        }
+    fun areInTheSameGame(player1: Player, player2: Player): Boolean {
+        val p1game = getGameForPlayer(player1) ?: return false
+        return p1game == getGameForPlayer(player2)
+    }
 
     fun getGameForPlayer(player: Player) = games.find { it.isPlayerPlaying(player) }
 

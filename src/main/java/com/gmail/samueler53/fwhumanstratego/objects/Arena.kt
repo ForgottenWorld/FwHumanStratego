@@ -1,21 +1,23 @@
 package com.gmail.samueler53.fwhumanstratego.objects
 
 import com.gmail.samueler53.fwhumanstratego.utils.LocationSerializable
+import kotlinx.serialization.Serializable
 import org.bukkit.Location
-import java.io.Serializable
 
-class Arena(val name: String) : Serializable {
-
-    private var redTeamLocationSerializable: LocationSerializable? = null
-    private var blueTeamLocationSerializable: LocationSerializable? = null
-    private var treasureRedLocationSerializable: LocationSerializable? = null
-    private var treasureBlueLocationSerializable: LocationSerializable? = null
+@Serializable
+data class Arena(
+    val name: String,
+    private var redTeamLocationSerializable: LocationSerializable? = null,
+    private var blueTeamLocationSerializable: LocationSerializable? = null,
+    private var treasureRedLocationSerializable: LocationSerializable? = null,
+    private var treasureBlueLocationSerializable: LocationSerializable? = null,
     private var lobbyLocationSerializable: LocationSerializable? = null
+) {
 
     var redTeamLocation
         get() = redTeamLocationSerializable?.let {
             Location(
-                it.getWorld(),
+                it.world,
                 it.x.toDouble(),
                 it.y.toDouble(),
                 it.z.toDouble()
@@ -23,7 +25,7 @@ class Arena(val name: String) : Serializable {
         }
         set(value) {
             this.redTeamLocationSerializable = LocationSerializable(
-                value!!.world!!,
+                value!!.world!!.uid.toString(),
                 value.blockX,
                 value.blockY,
                 value.blockZ
@@ -33,7 +35,7 @@ class Arena(val name: String) : Serializable {
     var blueTeamLocation
         get() = blueTeamLocationSerializable?.let {
             Location(
-                it.getWorld(),
+                it.world,
                 it.x.toDouble(),
                 it.y.toDouble(),
                 it.z.toDouble()
@@ -41,7 +43,7 @@ class Arena(val name: String) : Serializable {
         }
         set(value) {
             blueTeamLocationSerializable = LocationSerializable(
-                value!!.world!!,
+                value!!.world!!.uid.toString(),
                 value.blockX,
                 value.blockY,
                 value.blockZ
@@ -51,7 +53,7 @@ class Arena(val name: String) : Serializable {
     var treasureRedLocation
         get() = treasureRedLocationSerializable?.let {
             Location(
-                it.getWorld(),
+                it.world,
                 it.x.toDouble(),
                 it.y.toDouble(),
                 it.z.toDouble()
@@ -59,7 +61,7 @@ class Arena(val name: String) : Serializable {
         }
         set(value) {
             this.treasureRedLocationSerializable = LocationSerializable(
-                value!!.world!!,
+                value!!.world!!.uid.toString(),
                 value.blockX,
                 value.blockY,
                 value.blockZ
@@ -69,7 +71,7 @@ class Arena(val name: String) : Serializable {
     var treasureBlueLocation
         get() = treasureBlueLocationSerializable?.let {
             Location(
-                it.getWorld(),
+                it.world,
                 it.x.toDouble(),
                 it.y.toDouble(),
                 it.z.toDouble()
@@ -77,7 +79,7 @@ class Arena(val name: String) : Serializable {
         }
         set(value) {
             treasureBlueLocationSerializable = LocationSerializable(
-                value!!.world!!,
+                value!!.world!!.uid.toString(),
                 value.blockX,
                 value.blockY,
                 value.blockZ
@@ -87,7 +89,7 @@ class Arena(val name: String) : Serializable {
     var lobbyLocation
         get() = lobbyLocationSerializable?.let {
             Location(
-                it.getWorld(),
+                it.world,
                 it.x.toDouble(),
                 it.y.toDouble(),
                 it.z.toDouble()
@@ -95,15 +97,10 @@ class Arena(val name: String) : Serializable {
         }
         set(value) {
             this.lobbyLocationSerializable = LocationSerializable(
-                value!!.world!!,
+                value!!.world!!.uid.toString(),
                 value.blockX,
                 value.blockY,
                 value.blockZ
             )
         }
-
-    companion object {
-        @Transient
-        private val serialVersionUID = 1681012206529286330L
-    }
 }
