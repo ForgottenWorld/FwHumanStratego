@@ -12,15 +12,14 @@ import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
-class InGameActionBlocker : Listener {
+class GameActionBlocker : Listener {
 
     private fun cancelEventIfPlayerInGame(
         player: Player,
         event: Cancellable
     ) {
-        if (GameManager.getGameForPlayer(player) != null) {
-            event.isCancelled = true
-        }
+        if (GameManager.getGameForPlayer(player) == null) return
+        event.isCancelled = true
     }
 
     @EventHandler

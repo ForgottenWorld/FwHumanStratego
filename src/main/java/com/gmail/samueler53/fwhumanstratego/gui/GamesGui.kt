@@ -1,89 +1,76 @@
 package com.gmail.samueler53.fwhumanstratego.gui
 
-import com.github.stefvanschie.inventoryframework.Gui
-import com.github.stefvanschie.inventoryframework.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
-import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
-import com.gmail.samueler53.fwhumanstratego.message.Message
+import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 import com.gmail.samueler53.fwhumanstratego.objects.Arena
 import com.gmail.samueler53.fwhumanstratego.objects.Game
+import com.gmail.samueler53.fwhumanstratego.utils.editItemMeta
+import com.gmail.samueler53.fwhumanstratego.utils.itemStack
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemStack
-import java.util.*
+import org.bukkit.inventory.meta.ItemMeta
 
+@Suppress("Unused", "MemberVisibilityCanBePrivate")
 class GamesGui {
 
-    private val mainGui = Gui(1, "Games").apply {
-        setOnGlobalClick { it.isCancelled = true }
-        addPane(OutlinePane(0, 0, 9, 1).apply {
-            addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
-            setRepeat(true)
-        })
-        addPane(OutlinePane(0, 0, 9, 1))
+    lateinit var gui: ChestGui
+
+    lateinit var gamesPane: OutlinePane
+
+    private val arenaGuiItems = mutableMapOf<String, GuiItem>()
+
+
+    fun onGlobalClick(event: InventoryClickEvent) {
+        event.isCancelled = true
     }
 
-    fun createNewGame(arena: Arena, game: Game) {
-        val itemStack = ItemStack(Material.NETHERITE_BLOCK)
-        itemStack.itemMeta = itemStack.itemMeta?.apply {
-            setDisplayName(arena.name)
-            lore = listOf("${game.playersPlaying.size}/${game.numberOfPlayers}")
-        }
-        addGame(itemStack, game)
+    fun onOutsideClick(event: InventoryClickEvent) {
+        event.isCancelled = true
     }
 
-    private fun addGame(itemStack: ItemStack, game: Game) {
-        val gamesPane = mainGui.panes[1] as OutlinePane
-        mainGui.setOnOutsideClick { event: InventoryClickEvent -> event.isCancelled = true }
-        gamesPane.addItem(GuiItem(itemStack) { event: InventoryClickEvent ->
-            addPlayer(event.whoClicked as? Player ?: return@GuiItem, game)
-        })
-        mainGui.addPane(gamesPane)
-        mainGui.update()
-    }
-
-    fun removeGame(game: Game) {
-        mainGui.panes[1].items.removeIf {
-            it.item.itemMeta?.displayName.equals(game.arena.name, ignoreCase = true)
-        }
-        mainGui.update()
-    }
-
-    fun modifyGame(game: Game) {
-        val items = mainGui.panes[1].items
-        for (guiItem in items) {
-            if (!guiItem
-                    .item
-                    .itemMeta!!
-                    .displayName
-                    .equals(game.arena.name, ignoreCase = true)
-            ) continue
-            guiItem.item.itemMeta = guiItem.item.itemMeta?.apply {
-                lore = listOf("${game.playersPlaying.size}/${game.numberOfPlayers}")
+    fun onGameCreated(arena: Arena, game: Game) {
+        val itemStack = Material.NETHERITE_BLOCK.itemStack {
+            editItemMeta {
+                setDisplayName(arena.name)
+                setGameInfoLoreStrings(game)
             }
-            mainGui.update()
+        }
+        val guiItem = GuiItem(itemStack) {
+            game.onPlayerJoin(it.whoClicked as Player)
+        }
+        arenaGuiItems[arena.name] = guiItem
+        gamesPane.addItem(guiItem)
+        gui.update()
+    }
+
+    fun onGameRemoved(game: Game) {
+        val guiItem = arenaGuiItems[game.arena.name] ?: return
+        arenaGuiItems.remove(game.arena.name)
+        gamesPane.removeItem(guiItem)
+        gui.update()
+    }
+
+    fun updateGameInfo(game: Game) {
+        arenaGuiItems[game.arena.name]?.item?.editItemMeta {
+            setGameInfoLoreStrings(game)
+        }
+        gui.update()
+    }
+
+    private fun ItemMeta.setGameInfoLoreStrings(game: Game) {
+        lore = listOf("${game.playersPlaying.size}/${game.numberOfPlayers}")
+    }
+
+    companion object {
+
+        fun newInstance(): GamesGui {
+            val res = FwHumanStratego.instance.getResource("games_gui.xml")!!
+            return GamesGui().apply {
+                gui = res.use { ChestGui.load(this, it)!! }
+            }
         }
     }
-
-    fun getNumberOfGamesInTheGui() = mainGui.panes[1].items.size
-
-    fun show(player: Player) {
-        mainGui.show(player)
-    }
-
-    private fun addPlayer(player: Player, game: Game) {
-        if (game.numberOfPlayers == game.playersPlaying.size) {
-            Message.GAME_GAMEFULL.send(player)
-            return
-        }
-        Message.GAME_JOIN.send(player)
-        game.addPlayer(player)
-        game.playersLocations[player.uniqueId] = player.location
-        ArenaManager.teleportPlayerToLobby(player, game.arena)
-        modifyGame(game)
-        game.clearPlayer(player)
-        player.closeInventory()
-    }
-
 }

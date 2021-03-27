@@ -1,39 +1,97 @@
+###################
+## Game Settings ##
+###################
+
+rounds: 4
+delayStartGame: 300
+pointsFromTreasure: 1500
+
+###########
+## Roles ##
+###########
+
 roles:
   Generale:
     description: "E' in grado di uccidere tutti i ruoli tranne la bomba, puo' essere solamente ucciso da parte di un assassino. Attenzione se il generale muore, automaticamente perdi il round"
     points: 1500
+    can_attack: true
+    counterattacks: true
+    is_vital: true
+    min_players_to_activate: 2
+    min_players: 1
     max_players: 1
+    material: NETHERITE_SWORD
     can_kill: Maresciallo,Colonnello,Maggiore,Artificiere,Assassino
+    can_be_killed_by: Assassino
   Assassino:
     description: "Puo' uccidere solamente il generale, ma allo stesso tempo puo' venire ucciso da chiunque"
     points: 0
+    can_attack: true
+    counterattacks: false
+    is_vital: false
+    min_players_to_activate: 2
+    min_players: 0
     max_players: 1
+    material: LEAD
     can_kill: Generale
+    can_be_killed_by: Maresciallo,Bomba,Colonnello,Maggiore,Artificiere,Generale
   Bomba:
     description: "Non e' in grado di colpire, ma se viene colpita da tutti gli altri ruoli tranne il generale e l'artificiere essi esploderanno. L'artificiere e' l'unico ruolo in grado di disinnescarla "
     points: 50
+    can_attack: false
+    counterattacks: true
+    is_vital: false
+    min_players_to_activate: 4
+    min_players: 0
     max_players: 2
+    material: TNT
     can_kill: Maresciallo,Colonnello,Maggiore,Assassino
+    can_be_killed_by: Artificiere
   Artificiere:
     description: "Puo' uccidere solamente la bomba e l'assassino. Puo' essere uccisa da tutti gli altri ruoli"
     points: 100
+    can_attack: true
+    counterattacks: false
+    is_vital: false
+    min_players_to_activate: 4
+    min_players: 0
     max_players: 2
+    material: FLINT_AND_STEEL
     can_kill: Bomba,Assassino
+    can_be_killed_by: Maresciallo,Colonnello,Maggiore,Generale
   Maresciallo:
     description: "Può uccidere il colonnello, il maggiore, l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 300
+    can_attack: true
+    counterattacks: false
+    is_vital: false
+    min_players_to_activate: 2
+    min_players: 0
     max_players: 2
+    material: DIAMOND_SWORD
     can_kill: Colonnello,Maggiore,Artificiere,Assassino
+    can_be_killed_by: Bomba,Generale
   Colonnello:
     description: "Puo' uccidere il maggiore, l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 250
+    can_attack: true
+    counterattacks: false
+    is_vital: false
+    min_players_to_activate: 2
+    min_players: 0
     max_players: 3
+    material: IRON_SWORD
     can_kill: Maggiore,Artificiere,Assassino
+    can_be_killed_by: Bomba,Generale,Maresciallo
   Maggiore:
     description:  "Puo' uccidere l'artificiere e l'assassino. Puo' morire da tutti gli altri ruoli"
     points: 200
+    can_attack: true
+    counterattacks: false
+    is_vital: false
+    min_players_to_activate: 2
+    min_players: 0
     max_players: 4
+    material: STONE_SWORD
     can_kill: Artificiere,Assassino
-rounds: 4
-delayStartGame: 300
-pointsFromTreasure: 1500
+    can_be_killed_by: Bomba,Generale,Maresciallo,Colonnello

@@ -1,0 +1,22 @@
+<gui rows="3" title="Creazione arena" type="chest" onGlobalClick="onGlobalClick">
+    <outlinepane x="0" y="0" length="9" height="3" repeat="true">
+        <item id="black_stained_glass_pane"/>
+    </outlinepane>
+    <outlinepane x="2" y="1" length="5" height="1">
+        <item id="redstone_block" onClick="onRedSpawnClicked">
+            <displayname>Spawn del team rosso</displayname>
+        </item>
+        <item id="lapis_block" onClick="onBlueSpawnClicked">
+            <displayname>Spawn del team blu</displayname>
+        </item>
+        <item id="red_wool" onClick="onRedTreasureClicked">
+            <displayname>Tesoro rosso</displayname>
+        </item>
+        <item id="blue_wool" onClick="onBlueTreasureClicked">
+            <displayname>Tesoro blu</displayname>
+        </item>
+        <item id="glass_pane" onClick="onLobbyClicked">
+            <displayname>Lobby</displayname>
+        </item>
+    </outlinepane>
+</gui>

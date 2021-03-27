@@ -1,24 +1,30 @@
 package com.gmail.samueler53.fwhumanstratego.objects
 
-import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
+import com.gmail.samueler53.fwhumanstratego.configuration.Configuration
+import com.gmail.samueler53.fwhumanstratego.gui.RoleGui
 import com.gmail.samueler53.fwhumanstratego.gui.TeamGui
 import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
+import com.gmail.samueler53.fwhumanstratego.managers.RoleManager
 import com.gmail.samueler53.fwhumanstratego.message.Message
+import com.gmail.samueler53.fwhumanstratego.utils.GameplayUtils
+import com.gmail.samueler53.fwhumanstratego.utils.delayTicks
+import com.gmail.samueler53.fwhumanstratego.utils.editItemMetaOfType
+import com.gmail.samueler53.fwhumanstratego.utils.itemStack
 import com.gmail.samueler53.fwhumanstratego.utils.launch
-import kotlinx.coroutines.delay
-import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.Bukkit
+import org.bukkit.Color
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryType
+import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.LeatherArmorMeta
 import java.util.*
-import kotlin.properties.ReadOnlyProperty
 
 class Game(
     val arena: Arena,
@@ -27,360 +33,519 @@ class Game(
 
     val playersPlaying = mutableSetOf<UUID>()
 
-    private val roles = mutableListOf<Role>()
+    val teamGui = TeamGui.newInstance(this)
 
-    val playersLocations = mutableMapOf<UUID, Location>()
+    private val playerLocations = mutableMapOf<UUID, Location>()
 
-    var isStarted = false
+    private val scoreboard = Scoreboard(this)
 
-    private var rounds = 0
+    var currentRound = 0
 
-    val redTeam = Team(Team.Type.RED, this)
+    val redTeam = object : Team(
+        "ROSSO",
+        Material.RED_WOOL,
+        getColoredLeatherChestplate(Color.RED),
+        Message.GAME_ASSIGNED_TEAM_RED
+    ) {
+        override val roleGui = RoleGui.newInstance(this@Game, this)
+        override val spawnLocation get() = arena.redTeamLocation
+    }
 
-    val blueTeam = Team(Team.Type.BLUE, this)
-
-    val scoreboard = Scoreboard(this)
+    val blueTeam = object : Team(
+        "BLU",
+        Material.BLUE_WOOL,
+        getColoredLeatherChestplate(Color.BLUE),
+        Message.GAME_ASSIGNED_TEAM_BLUE
+    ) {
+        override val roleGui = RoleGui.newInstance(this@Game, this)
+        override val spawnLocation get() = arena.blueTeamLocation
+    }
 
     init {
-        loadDefaultRoles()
-        loadRolesRemaining()
+        resetAvailableRoles()
     }
 
-    val teamGui = TeamGui(this)
-
-    private fun loadDefaultRoles() {
-        val config = FwHumanStratego.defaultConfig
-        val rolesByName = mutableMapOf<String, Role>()
-        for (k in config.getConfigurationSection("roles")!!.getKeys(false)) {
-            val points = config.getInt("roles.$k.points")
-            val description = config.getString("roles.$k.description")!!
-            val maxPlayers = config.getInt("roles.$k.max_players")
-            val canKillString = config.getString("roles.$k.can_kill")!!
-            val roleName = k.toLowerCase()
-            val role = Role(roleName, points, description, canKillString, maxPlayers)
-            rolesByName[roleName] = role
-            roles.add(role)
+    private fun resetAvailableRoles() {
+        val playersPerTeam = numberOfPlayers / 2
+        val available = RoleManager.roles.values.filter {
+            it.minPlayersToActivate <= playersPerTeam
         }
-        for (role in rolesByName.values) {
-            role.canKill = role
-                .canKillString
-                .split(",")
-                .map { rolesByName[it]!! }
-                .toSet()
+        val mandatory = available.filter { it.minPlayers > 0 }
+        val rolesRemaining = available.associateWith { r ->
+            val capped = r.maxPlayers.coerceAtMost(playersPerTeam)
+            val reserved = mandatory.filterNot { it == r }.sumBy { it.minPlayers }
+            capped - reserved
         }
+        redTeam.rolesRemaining = rolesRemaining.toMutableMap()
+        blueTeam.rolesRemaining = rolesRemaining.toMutableMap()
     }
 
-    fun loadRolesRemaining() {
-        val rolesRemaining = roles.associateWith { 0 }.toMutableMap()
-        val specialRolesList = roles.filter { isASpecialRole(it) }
-        var specialRoles = numberOfPlayers / 2 - 1
-        for (role in specialRolesList) {
-            if (role.name.equals("generale", ignoreCase = true)) {
-                rolesRemaining[role] = 1
-                break
-            }
+    fun onPlayerJoin(player: Player) {
+        if (numberOfPlayers == playersPlaying.size) {
+            Message.GAME_GAMEFULL.send(player)
+            return
         }
-        while (specialRoles > 0) {
-            for (role in specialRolesList) {
-                if (specialRoles > 0 && !role.name.equals("generale", ignoreCase = true)) {
-                    rolesRemaining[role] = rolesRemaining[role]!! + 1
-                    specialRoles--
-                }
-            }
-        }
-        val normalRolesList = loadNormalRoles()
-        var normalroles = numberOfPlayers
-        while (normalroles > 0) {
-            for (role in normalRolesList) {
-                if (normalroles > 0) {
-                    rolesRemaining[role] = rolesRemaining[role]!! + 1
-                    normalroles--
-                }
-            }
-        }
-        redTeam.rolesRemaining = rolesRemaining
-        blueTeam.rolesRemaining = rolesRemaining
-    }
 
-    private fun loadNormalRoles(): List<Role> {
-        val normalRoles = mutableListOf<Role>()
-        for (role in roles) {
-            if (isANormalRole(role)) {
-                normalRoles.add(role)
-            }
-        }
-        return normalRoles
-    }
+        Message.GAME_JOIN.send(player)
 
-    fun messageRole(player: Player) {
-        val clickMessage = TextComponent("[INFORMAZIONI SUL RUOLO]")
-        clickMessage.color = ChatColor.GREEN
-        clickMessage.clickEvent = ClickEvent(
-            ClickEvent.Action.RUN_COMMAND,
-            """/hs info ${getRoleFromPlayer(player)!!.name}"""
-        )
-        clickMessage.hoverEvent = HoverEvent(
-            HoverEvent.Action.SHOW_TEXT,
-            Text("Clicca per avere informazioni sul tuo ruolo")
-        )
-        player.spigot().sendMessage(clickMessage)
-    }
+        playersPlaying.add(player.uniqueId)
 
-    fun addPlayer(player: Player) {
-        if (!isPlayerPlaying(player)) {
-            playersPlaying.add(player.uniqueId)
-        }
-    }
-
-    fun removePlayer(player: Player) {
-        if (isPlayerPlaying(player)) {
-            playersPlaying.remove(player.uniqueId)
-        }
-    }
-
-    fun teamAssignment(player: Player, team: Team) {
-        team.addPlayer(player)
-    }
-
-    fun start() {
+        GameManager.setGameForPlayer(player, this)
+        GameManager.gamesGui.updateGameInfo(this)
+        playerLocations[player.uniqueId] = player.location
+        player.teleport(arena.lobbyLocation)
+        GameplayUtils.cleansePlayer(player)
+        Message.GAME_CHOOSE_TEAM.send(player)
         launch {
-            delay(FwHumanStratego.defaultConfig.getInt("delayStartGame").toLong())
-            isStarted = true
-            rounds++
-            initializeRoleGui()
-            survivalModeEachPlayer()
-            ArenaManager.teleportTeams(arena, this@Game)
-            equipKits()
-            scoreboard.initScoreboards()
-            ArenaManager.initializeArena(arena)
-            GameManager.gamesGui.removeGame(this@Game)
+            delayTicks(2)
+            teamGui.gui.show(player)
         }
     }
 
-    private fun equipKits() {
-        redTeam.equipKitForEachPlayer()
-        blueTeam.equipKitForEachPlayer()
+    private fun onDelayRoundStart() {
+        launch {
+            delayTicks(Configuration.delayGameStart)
+            onRoundStart()
+        }
     }
 
-    fun initializeRoleGui() {
-        redTeam.roleGui.addItemStack()
-        blueTeam.roleGui.addItemStack()
+    private fun onRoundStart() {
+        ++currentRound
+        redTeam.roleGui.updateRoles()
+        blueTeam.roleGui.updateRoles()
+        redTeam.preparePlayersForRound()
+        blueTeam.preparePlayersForRound()
+        scoreboard.initScoreboards()
+        ArenaManager.initializeArena(arena)
+        GameManager.gamesGui.onGameRemoved(this@Game)
     }
 
-    fun endRound(team: Team?) {
-        Message.GAME_ROUNDWINNER.broadcast(this, team!!.type)
+    private fun onRoundEnd(winningTeam: Team) {
+        Message.GAME_ROUND_WINNER.broadcast(this, winningTeam.name)
         scoreboard.removeScoreboards()
-        clearEachPlayer()
-        clearRoles()
-        if (isEndGame()) {
-            endGame()
-        } else {
-            spectatorModeEachPlayer()
-            loadRolesRemaining()
-            Message.GAME_NEWROUND.broadcast(this)
-            start()
+        cleanseAllPlayers()
+        redTeam.playersRoles.clear()
+        blueTeam.playersRoles.clear()
+
+        if (currentRound == Configuration.rounds) {
+            onGameEnd()
+            return
         }
+
+        for (player in playersPlaying.mapNotNull(Bukkit::getPlayer)) {
+            player.gameMode = GameMode.SPECTATOR
+        }
+
+        resetAvailableRoles()
+        Message.GAME_NEW_ROUND.broadcast(this)
+        onDelayRoundStart()
     }
 
-    private fun endGame() {
-        isStarted = false
-        if (isDraw()) {
+    private fun onGameEnd() {
+        if (redTeam.score == blueTeam.score) {
             Message.GAME_DRAW.broadcast(this)
         } else {
-            val teamWinner = getTeamWinner()
-            Message.GAME_TEAMWINNER.broadcast(this, teamWinner.type)
+            val teamWinner = if (redTeam.score > blueTeam.score) redTeam else blueTeam
+            Message.GAME_GAME_OVER_TEAM_WINS.broadcast(this, teamWinner.name)
         }
-        survivalModeEachPlayer()
+        putAllPlayersInSurvivalMode()
         teleportPlayersInPreviouslyLocation()
-        GameManager.removeGame(this)
+        GameManager.removeGame(arena)
     }
 
-    fun teleportPlayersInPreviouslyLocation() {
-        for (uuid in playersLocations.keys) {
-            Bukkit.getPlayer(uuid)?.teleport(playersLocations[uuid]!!)
+    private fun teleportPlayersInPreviouslyLocation() {
+        for (uuid in playerLocations.keys) {
+            Bukkit.getPlayer(uuid)?.teleport(playerLocations[uuid]!!)
         }
     }
 
-    fun addPlayerRole(
-        player: Player,
-        role: Role,
-        team: Team
-    ) {
-        team.addPlayerRole(player, role)
-    }
-
-    private fun clearRoles() {
-        redTeam.clearRoles()
-        blueTeam.clearRoles()
-    }
-
-    fun clearEachPlayer() {
+    private fun cleanseAllPlayers() {
         playersPlaying
             .mapNotNull(Bukkit::getPlayer)
-            .forEach(::clearPlayer)
+            .forEach(GameplayUtils::cleansePlayer)
     }
 
-    private fun survivalModeEachPlayer() {
+    private fun putAllPlayersInSurvivalMode() {
         playersPlaying
             .mapNotNull(Bukkit::getPlayer)
-            .forEach(::survivalMode)
+            .forEach {
+                it.gameMode = GameMode.SURVIVAL
+            }
     }
 
-    private fun spectatorModeEachPlayer() {
-        for (uuid in playersPlaying) {
-            val player = Bukkit.getPlayer(uuid) ?: return
-            player.gameMode = GameMode.SPECTATOR
+    fun onPlayerChangeNumberOfPlayers(player: Player, newNumberOfPlayers: Int) {
+        if (currentRound > 0) {
+            Message.GAME_STARTED.send(player)
+            return
+        }
+
+        if (newNumberOfPlayers % 2 != 0 || newNumberOfPlayers <= 1) {
+            Message.GAME_ODD_PLAYERS.send(player)
+            return
+        }
+
+        if (playersPlaying.size > newNumberOfPlayers) {
+            Message.GAME_UNMODIFIABLE.send(player)
+            return
+        }
+
+        if (redTeam.playersRoles.size + blueTeam.playersRoles.size == numberOfPlayers) {
+            Message.GAME_UNMODIFIABLE_2.send(player)
+            return
+        }
+
+        Message.GAME_EDITABLE.send(player)
+        numberOfPlayers = newNumberOfPlayers
+        resetAvailableRoles()
+        teamGui.update()
+        GameManager.gamesGui.updateGameInfo(this)
+
+        if (isReadyToStart) {
+            Message.GAME_IS_STARTING.broadcast(this)
+            onDelayRoundStart()
         }
     }
 
-    fun clearPlayer(player: Player) {
-        player.foodLevel = 20
-        for (effect in player.activePotionEffects) {
-            player.removePotionEffect(effect.type)
-        }
-        survivalMode(player)
-        if (player.walkSpeed != 0.2f) {
-            player.walkSpeed = 0.2f
-        }
-        player.inventory.clear()
-        player.inventory.setArmorContents(null)
+    fun onPlayerStopGame(player: Player) {
+        teleportPlayersInPreviouslyLocation()
+        cleanseAllPlayers()
+        scoreboard.removeScoreboards()
+        GameManager.gamesGui.onGameRemoved(this)
+        GameManager.removeGame(arena)
+        Message.GAME_STOPPED.send(player)
     }
 
-    private fun survivalMode(player: Player) {
-        if (player.gameMode != GameMode.SURVIVAL) {
-            player.gameMode = GameMode.SURVIVAL
-        }
-    }
-
-    fun stolenWool(player: Player) {
-        val otherTeam = getOtherTeam(getTeamForPlayer(player))
+    private fun onPlayerLoseWool(player: Player) {
+        val otherTeam = player.team.opponent
+        if (!player.inventory.contains(otherTeam.treasure)) return
+        player.inventory.remove(otherTeam.treasure)
         if (otherTeam.treasure == Material.BLUE_WOOL) {
-            player.inventory.remove(Material.BLUE_WOOL)
-            ArenaManager.treasureBlue(arena.treasureBlueLocation!!, arena)
+            ArenaManager.setBlueTreasure(arena.treasureBlueLocation, arena)
         } else if (otherTeam.treasure == Material.RED_WOOL) {
-            player.inventory.remove(Material.RED_WOOL)
-            ArenaManager.treasureRed(arena.treasureRedLocation!!, arena)
+            ArenaManager.setRedTreasure(arena.treasureRedLocation, arena)
         }
+        Message.GAME_TREASURE_SAVED.broadcast(this, player.displayName)
     }
 
-    fun spectateMode(team: Team) {
-        for (uuid in team.playersRoles.keys) {
-            val player = Bukkit.getPlayer(uuid) ?: continue
-            if (hasPlayerRole(player)) continue
-            player.closeInventory()
-            player.gameMode = GameMode.SPECTATOR
+    fun onPlayerChangeRole(player: Player, role: Role) {
+        val team = player.team
+
+        if (team.countPlayersWithRole(role) >= role.maxPlayers) {
+            Message.GAME_ROLE_FULL.send(player)
+            return
         }
+
+        if (team.rolesRemaining[role]!! <= 0) {
+            Message.GAME_ROLE_NO_LONGER_AVAIL.send(player)
+            return
+        }
+
+        team.setPlayerRole(player, role)
+
+        if (team.hasRolesLeft) return
+
+        team.players
+            .mapNotNull(Bukkit::getPlayer)
+            .forEach {
+                it.closeInventory()
+                it.gameMode = GameMode.SPECTATOR
+            }
     }
 
-    private fun canKill(roleDamageDealer: Role, roleDamaged: Role) =
-        roleDamageDealer.canKill.contains(roleDamaged)
+    private fun isPlayerInTeam(player: Player) = redTeam.players.contains(player.uniqueId) ||
+        blueTeam.players.contains(player.uniqueId)
 
-    fun areInTheSameTeam(
-        player1: Player,
-        player2: Player
-    ) = getTeamForPlayer(player1) == getTeamForPlayer(player2)
+    fun containsPlayer(player: Player) = playersPlaying.contains(player.uniqueId)
 
-    fun isPlayerInTeam(player: Player) = redTeam.playersRoles.containsKey(player.uniqueId) ||
-        blueTeam.playersRoles.containsKey(player.uniqueId)
+    private val isReadyToStart
+        get() = numberOfPlayers / 2 == redTeam.players.size &&
+            numberOfPlayers / 2 == blueTeam.players.size
 
-    private fun hasPlayerRole(player: Player) = getTeamForPlayer(player).playersRoles[player.uniqueId] != null
+    fun onPlayerAttackPlayer(attacker: Player, attacked: Player) {
+        if (currentRound == 0) {
+            Message.GAME_PREPARATION_PHASE.send(attacker)
+            return
+        }
 
-    fun hasStoleWool(player: Player): Boolean {
-        val otherTeam = getOtherTeam(getTeamForPlayer(player))
-        return player.inventory.contains(otherTeam.treasure)
+        val attackerTeam = attacker.team
+        val attackedTeam = attacked.team
+
+        if (attackerTeam == attackedTeam) {
+            Message.GAME_SAME_TEAM.send(attacker)
+            return
+        }
+
+        val attackerRole = attacker.role ?: return
+        val attackedRole = attacked.role ?: return
+
+        if (attackedRole == attackerRole) return
+
+        if (!attackerRole.canAttack) {
+            Message.THIS_ROLE_CANT_ATTACK.send(attacker)
+            return
+        }
+
+        val loser: Player
+        val winner: Player
+        val losingRole: Role
+        val losingTeam: Team
+
+        when {
+            attackerRole.canKill(attackedRole) -> {
+                winner = attacker
+                loser = attacked
+                losingRole = attackedRole
+                losingTeam = attackedTeam
+            }
+            attackedRole.counterattacks && attackedRole.canKill(attackerRole) -> {
+                winner = attacked
+                loser = attacker
+                losingRole = attackerRole
+                losingTeam = attackerTeam
+            }
+            else -> return
+        }
+
+        winner.playSound(winner.location, Sound.ENTITY_PLAYER_ATTACK_CRIT, 10.0f, 10.0f)
+
+        losingTeam.opponent.score += losingRole.points
+        scoreboard.removeScoreboardForPlayer(loser)
+        losingTeam.teleportPlayerToSpawn(loser)
+
+        if (losingRole.isVital) {
+            Message.GAME_VITAL_CHAR_DEAD.broadcast(this)
+            onRoundEnd(losingTeam.opponent)
+            return
+        }
+
+        onPlayerLoseWool(loser)
+
+        losingTeam.playersRoles.remove(loser.uniqueId)
+        losingTeam.roleGui.updateRoles()
     }
 
-    fun isPlayerPlaying(player: Player) = playersPlaying.contains(player.uniqueId)
+    fun onPlayerLeave(player: Player, disconnect: Boolean) {
+        if (!disconnect && currentRound > 0) {
+            Message.GAME_LEAVE_WHEN_STARTED.send(player)
+            return
+        }
 
-    fun isReadyToStart() = numberOfPlayers / 2 == redTeam.playersRoles.size &&
-        numberOfPlayers / 2 == blueTeam.playersRoles.size
-
-    private fun isASpecialRole(role: Role): Boolean {
-        return role.name.equals("generale", ignoreCase = true) ||
-            role.name.equals("assassino", ignoreCase = true) ||
-            role.name.equals("bomba", ignoreCase = true) ||
-            role.name.equals("artificiere", ignoreCase = true)
-    }
-
-    private fun isANormalRole(role: Role): Boolean {
-        return role.name.equals("maresciallo", ignoreCase = true) ||
-            role.name.equals("colonnello", ignoreCase = true) ||
-            role.name.equals("maggiore", ignoreCase = true)
-    }
-
-    fun onPlayerLeave(player: Player) {
         if (isPlayerInTeam(player)) {
-            val team = getTeamForPlayer(player)
-            if (isStarted) {
-                Message.GAME_DESERTER.broadcast(this, player.displayName)
-                val role = getRoleFromPlayer(player)
-                if (role != null) {
-                    team.rolesRemaining[role] = team.rolesRemaining[role]!! + 1
-                    team.playersRoles.remove(player.uniqueId)
-                    team.roleGui.updateGui()
-                    if (hasStoleWool(player)) {
-                        stolenWool(player)
-                        Message.GAME_TREASURESAVED.broadcast(this, player.displayName)
+            player.team.removePlayer(player)
+        }
+
+        GameManager.removePlayerFromGame(player)
+
+        GameplayUtils.cleansePlayer(player)
+
+        if (!disconnect) {
+            Message.GAME_LEAVE.send(player)
+            GameManager.gamesGui.updateGameInfo(this)
+        }
+
+        playersPlaying.remove(player.uniqueId)
+        player.teleport(playerLocations[player.uniqueId]!!)
+        playerLocations.remove(player.uniqueId)
+    }
+
+    fun onPlayerRequestRoleChange(player: Player) {
+        if (currentRound == 0 || player.role != null) return
+        player.team.roleGui.gui.show(player)
+    }
+
+    private val Player.role get() = this.team.playersRoles[uniqueId]
+
+    private val Player.team get() = if (redTeam.players.contains(uniqueId)) redTeam else blueTeam
+
+    fun onPlayerChat(event: AsyncPlayerChatEvent) {
+        if (!isPlayerInTeam(event.player)) return
+        event.isCancelled = true
+        val team = event.player.team
+        val message = when (team) {
+            redTeam -> "§4Red team %s: %s"
+            blueTeam -> "§9Blue team %s: %s"
+            else -> return
+        }
+        for (p in team.playersRoles.keys.mapNotNull(Bukkit::getPlayer)) {
+            p.sendMessage(message.format(event.player.displayName, event.message))
+        }
+    }
+
+    fun onInventoryClick(player: Player, event: InventoryClickEvent) {
+        if (event.slotType == InventoryType.SlotType.ARMOR) {
+            Message.GAME_CANT_TAKE_ARMOR_OFF.send(player)
+            event.isCancelled = true
+            return
+        }
+
+        if (player.gameMode == GameMode.SPECTATOR) {
+            event.isCancelled = true
+            return
+        }
+
+        if (currentRound == 0) return
+        val team = player.team
+
+        with(event) {
+            when {
+                currentItem?.type == team.treasure -> {
+                    Message.GAME_CANT_STILL_OWN_WOOL.send(player)
+                    isCancelled = true
+                }
+                clickedInventory!!.location == arena.treasureBlueLocation && team == redTeam -> {
+                    if (currentItem!!.type == team.opponent.treasure) {
+                        Message.GAME_STOLEN_WOOL_BLUE.broadcast(this@Game, player.displayName)
+                    }
+                }
+                clickedInventory!!.location == arena.treasureRedLocation && team == blueTeam -> {
+                    if (currentItem!!.type == team.opponent.treasure) {
+                        Message.GAME_STOLEN_WOOL_RED.broadcast(this@Game, player.displayName)
+                    }
+                }
+                view.topInventory.location != null &&
+                    currentItem != null &&
+                    (currentItem!!.type == Material.RED_WOOL || currentItem!!.type == Material.BLUE_WOOL) &&
+                    view.topInventory.location != arena.treasureRedLocation &&
+                    view.topInventory.location != arena.treasureBlueLocation -> {
+                    isCancelled = true
+                }
+            }
+
+            if (inventory.holder == arena.treasureRedLocation && team == redTeam ||
+                inventory.location == arena.treasureBlueLocation && team == blueTeam
+            ) {
+                if (inventory.contains(team.opponent.treasure)) {
+                    launch {
+                        delayTicks(1)
+                        Message.GAME_TREASURE_STOLEN.broadcast(this@Game)
+                        team.score += Configuration.pointsFromTreasure
+                        onRoundEnd(team)
                     }
                 }
             }
-            team.removePlayer(player)
-            teamGui.updateGui()
         }
-        clearPlayer(player)
-        removePlayer(player)
-        player.teleport(playersLocations[player.uniqueId]!!)
-        playersLocations.remove(player.uniqueId)
     }
 
-    fun isRoleAvailableForTeam(role: Role, team: Team) = countPlayersWithRole(role, team) < role.maxPlayers
-
-    fun isRemainingARole(role: Role, team: Team) = team.rolesRemaining[role]!! > 0
-
-    fun isGeneral(player: Player) = getRoleFromPlayer(player)
-        ?.name
-        .equals("Generale", ignoreCase = true)
-
-    fun isBomb(player: Player): Boolean {
-        return getRoleFromPlayer(player)?.name.equals("Bomba", ignoreCase = true)
+    fun sendArenaInfoToPlayer(player: Player) {
+        player.sendMessage("§aNome partita: ${arena.name}")
+        player.sendMessage("§aPlayer attuali: ${playersPlaying.size}")
+        player.sendMessage("§aPlayer massimi: $numberOfPlayers")
     }
 
-    private fun isEndGame() = rounds == FwHumanStratego.defaultConfig.getInt("rounds")
+    fun onPlayerChooseTeam(player: Player, team: Team) {
+        if (team.playersRoles.size == numberOfPlayers / 2) {
+            Message.GAME_TEAMFULL.send(player)
+            return
+        }
 
-    fun isSpectateMode(team: Team) = team.rolesRemaining.values.none { it != 0 }
+        if (team.playersRoles.containsKey(player.uniqueId)) {
+            team.removePlayer(player)
+        } else {
+            val otherTeam = team.opponent
+            if (otherTeam.playersRoles.containsKey(player.uniqueId)) {
+                otherTeam.removePlayer(player)
+            }
+        }
 
-    private fun isDraw() = redTeam.points == blueTeam.points
+        team.players.add(player.uniqueId)
+        teamGui.update()
+        player.closeInventory()
 
-    fun getOtherTeam(team: Team) = if (team == redTeam) blueTeam else redTeam
+        team.teamAssignedMessage.send(player)
 
-    fun getRoleFromPlayer(player: Player) = getTeamForPlayer(player).playersRoles[player.uniqueId]
-
-    fun <T> roles() = ReadOnlyProperty<T, Role> { _, property ->
-        getRoleByName(property.name)!!
+        if (isReadyToStart) {
+            Message.GAME_IS_STARTING.broadcast(this)
+            onDelayRoundStart()
+        }
     }
 
-    fun getRoleByName(roleName: String) = roles.find { it.name.equals(roleName, ignoreCase = true) }
+    private fun getColoredLeatherChestplate(color: Color) =
+        Material.LEATHER_CHESTPLATE.itemStack {
+            editItemMetaOfType<LeatherArmorMeta> {
+                setColor(color)
+            }
+        }
 
-    fun countPlayersWithRole(
-        role: Role,
-        team: Team
-    ) = team.playersRoles.count { (_, v) ->
-        v == role
+    abstract inner class Team(
+        val name: String,
+        val treasure: Material,
+        private val kit: ItemStack,
+        val teamAssignedMessage: Message
+    ) {
+
+        abstract val roleGui: RoleGui
+
+        abstract val spawnLocation: Location
+
+        var score = 0
+
+        val players = mutableListOf<UUID>()
+
+        var playersRoles = mutableMapOf<UUID, Role>()
+
+        var rolesRemaining = mutableMapOf<Role, Int>()
+            set(value) {
+                field = value
+                roleGui.updateRoles()
+            }
+
+        val hasRolesLeft get() = rolesRemaining.values.none { it != 0 }
+
+        val opponent: Team get() = if (redTeam == this) this else blueTeam
+
+        fun setPlayerRole(player: Player, role: Role) {
+            playersRoles[player.uniqueId] = role
+            rolesRemaining[role] = rolesRemaining[role]!! - 1
+            scoreboard.updatePlayerRole(player, role)
+            roleGui.updateRoles()
+            player.sendTitle("Il tuo nuovo ruolo e'", role.name, 30, 100, 30)
+            GameplayUtils.cleansePlayer(player, false)
+            role.sendInfoLinkToPlayer(player)
+        }
+
+        fun teleportPlayerToSpawn(player: Player) {
+            player.teleport(spawnLocation)
+            launch {
+                Message.GAME_CHOOSE_ROLE.send(player)
+                delayTicks(2)
+                if (!hasRolesLeft) {
+                    player.gameMode = GameMode.SPECTATOR
+                } else {
+                    roleGui.gui.show(player)
+                }
+                GameplayUtils.rootPlayer(player)
+            }
+        }
+
+        fun preparePlayersForRound() {
+            for (player in players.mapNotNull(Bukkit::getPlayer)) {
+                player.gameMode = GameMode.SURVIVAL
+                player.inventory.chestplate = kit
+                teleportPlayerToSpawn(player)
+            }
+        }
+
+        fun removePlayer(player: Player) {
+            players.remove(player.uniqueId)
+
+            if (currentRound == 0) {
+                playersRoles.remove(player.uniqueId)
+                teamGui.update()
+                return
+            }
+
+            Message.GAME_DESERTER.broadcast(this@Game, player.displayName)
+            val role = player.role
+            playersRoles.remove(player.uniqueId)
+            teamGui.update()
+
+            if (role == null) return
+            rolesRemaining[role] = rolesRemaining[role]!! + 1
+            roleGui.updateRoles()
+
+            onPlayerLoseWool(player)
+        }
+
+        fun countPlayersWithRole(role: Role) = playersRoles.values.count { it == role }
     }
-
-    fun getTeamForPlayer(player: Player) = if (redTeam.playersRoles.containsKey(player.uniqueId)) redTeam else blueTeam
-
-    fun getWhoLose(damageDealer: Player, damaged: Player): Player {
-        val roleDamageDealer = getRoleFromPlayer(damageDealer)!!
-        val roleDamaged = getRoleFromPlayer(damaged)!!
-        return if (canKill(roleDamageDealer, roleDamaged)) damaged else damageDealer
-    }
-
-    fun getWhoWin(damageDealer: Player, damaged: Player): Player {
-        val roleDamageDealer = getRoleFromPlayer(damageDealer)!!
-        val roleDamaged = getRoleFromPlayer(damaged)!!
-        return if (canKill(roleDamageDealer, roleDamaged)) damageDealer else damaged
-    }
-
-    private fun getTeamWinner() = if (redTeam.points > blueTeam.points) redTeam else blueTeam
 }

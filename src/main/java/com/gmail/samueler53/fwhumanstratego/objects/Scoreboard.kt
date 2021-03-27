@@ -32,10 +32,10 @@ class Scoreboard internal constructor(private val game: Game) {
         }
     }
 
-    fun updatePlayerRole(player: Player) {
+    fun updatePlayerRole(player: Player, role: Role) {
         removeScoreboardForPlayer(player)
         boards[player.uniqueId]?.updateLines(
-            listOf("", "${ChatColor.RED}Role: ${ChatColor.WHITE}${game.getRoleFromPlayer(player)!!.name}", "")
+            listOf("", "§cRole: ${ChatColor.WHITE}${role.name}", "")
         )
     }
 }

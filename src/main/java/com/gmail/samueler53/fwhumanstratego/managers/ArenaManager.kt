@@ -1,198 +1,157 @@
 package com.gmail.samueler53.fwhumanstratego.managers
 
+import com.charleskorn.kaml.Yaml
 import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
-import com.gmail.samueler53.fwhumanstratego.gui.SetArenaGui
 import com.gmail.samueler53.fwhumanstratego.message.Message
 import com.gmail.samueler53.fwhumanstratego.objects.Arena
-import com.gmail.samueler53.fwhumanstratego.objects.Game
-import com.gmail.samueler53.fwhumanstratego.objects.Team
-import org.bukkit.Bukkit
+import com.gmail.samueler53.fwhumanstratego.utils.WeakLocation
+import com.gmail.samueler53.fwhumanstratego.utils.launchAsync
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.block.Chest
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.io.File
+import java.io.IOException
+import java.util.*
 
 object ArenaManager {
 
-    fun createArena(name: String, player: Player) {
-        if (FwHumanStratego.data.arenas.none { it.name.equals(name, ignoreCase = true) }) {
-            FwHumanStratego.data.arenas.add(Arena(name))
-            Message.ARENA_CREATED.send(player, name)
-            FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
-        } else {
-            Message.ARENA_ALREADY_EXISTS.send(player, name)
+    private val ARENA_SAVE_FILE by lazy {
+        File(FwHumanStratego.instance.dataFolder, "arenas.yml")
+    }
+
+    private var arenas = mutableMapOf<String, Arena>()
+
+    private val arenaBuilders = mutableMapOf<UUID, Arena.Builder>()
+    
+    fun loadData() {
+        val deserialized = Yaml.default.decodeFromString(
+            MapSerializer(String.serializer(), Arena.serializer()),
+            ARENA_SAVE_FILE.readText()
+        )
+        arenas = deserialized.toMutableMap()
+    }
+
+    private fun saveData() {
+        val saveData = Yaml.default.encodeToString(
+            MapSerializer(String.serializer(), Arena.serializer()),
+            arenas
+        )
+
+        launchAsync {
+            try {
+                ARENA_SAVE_FILE.writeText(saveData)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
+    }
+
+    fun playerStartBuildingArena(player: Player, name: String) {
+        if (arenas.keys.contains(name)) {
+            Message.ARENA_ALREADY_EXISTS.send(player, name)
+            return
+        }
+
+        arenaBuilders[player.uniqueId] = Arena.Builder(name)
+        Message.ARENA_BUILDER_CREATED.send(player)
+        saveData()
     }
 
     private fun removeChest(location: Location) {
-        if (location.block.type == Material.CHEST) {
-            clearChest(location.block)
-            location.block.type = Material.AIR
-        }
+        if (location.block.type != Material.CHEST) return
+        (location.block.state as Chest).blockInventory.clear()
+        location.block.type = Material.AIR
     }
 
-    private fun clearChest(block: Block) {
-        val chest = block.state as Chest
-        chest.blockInventory.clear()
-    }
-
-    fun deleteArena(arena: Arena, player: Player) {
-        removeChest(arena.redTeamLocation!!)
-        removeChest(arena.blueTeamLocation!!)
-        FwHumanStratego.data.arenas.remove(arena)
+    fun onPlayerDeleteArena(player: Player, arena: Arena) {
+        removeChest(arena.redTeamLocation)
+        removeChest(arena.blueTeamLocation)
+        arenas.remove(arena.name)
         Message.ARENA_REMOVE.send(player)
-        FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
-    }
-
-    fun teleportTeams(arena: Arena, game: Game) {
-        teleportRedTeam(arena, game)
-        teleportBlueTeam(arena, game)
-    }
-
-    private fun teleportRedTeam(arena: Arena, game: Game) {
-        for (uuid in game.redTeam.playersRoles.keys) {
-            Bukkit.getPlayer(uuid)?.teleport(arena.redTeamLocation!!)
-        }
-    }
-
-    private fun teleportRedPlayer(player: Player, game: Game) {
-        player.teleport(game.arena.redTeamLocation!!)
-    }
-
-    private fun teleportBlueTeam(arena: Arena, game: Game) {
-        for (uuid in game.blueTeam.playersRoles.keys) {
-            Bukkit.getPlayer(uuid)?.teleport(arena.blueTeamLocation!!)
-        }
-    }
-
-    private fun teleportBluePlayer(player: Player, game: Game) {
-        player.teleport(game.arena.blueTeamLocation!!)
-    }
-
-    fun teleportPlayerToLobby(player: Player, arena: Arena) {
-        player.teleport(arena.lobbyLocation!!)
-    }
-
-    fun teleportPlayerToHisSpawnPoint(player: Player, game: Game) {
-        if (game.getTeamForPlayer(player).type == Team.Type.RED) {
-            teleportRedPlayer(player, game)
-        } else {
-            teleportBluePlayer(player, game)
-        }
+        saveData()
     }
 
     fun initializeArena(arena: Arena) {
-        treasureRed(arena.treasureRedLocation!!, arena)
-        treasureBlue(arena.treasureBlueLocation!!, arena)
+        setRedTreasure(arena.treasureRedLocation, arena)
+        setBlueTreasure(arena.treasureBlueLocation, arena)
     }
 
-    fun treasureRed(location: Location, arena: Arena) {
-        removeChest(arena.treasureRedLocation!!)
+    private fun setTreasure(
+        location: Location,
+        oldLocation: Location?,
+        material: Material
+    ) {
+        oldLocation?.let(::removeChest)
         location.block.type = Material.CHEST
         val block = location.block
-        if (block.type != Material.CHEST) {
-            return
+        if (block.type != Material.CHEST) return
+        (block.state as Chest).blockInventory.addItem(ItemStack(material))
+    }
+
+    fun setRedTreasure(location: Location, arena: Arena) {
+        setTreasure(location, arena.treasureRedLocation, Material.RED_WOOL)
+    }
+
+    fun setBlueTreasure(location: Location, arena: Arena) {
+        setTreasure(location, arena.treasureBlueLocation, Material.BLUE_WOOL)
+    }
+
+    fun getPlayerArenaBuilder(player: Player) = arenaBuilders[player.uniqueId]
+        ?: run {
+            Message.ARENA_CREATION_NOT_EDITING.send(player)
+            null
         }
-        val chest = block.state as Chest
-        chest.blockInventory.addItem(ItemStack(Material.RED_WOOL))
+
+    private fun tryBuildingArena(player: Player, builder: Arena.Builder) {
+        val arena = builder.build() ?: return
+        arenas[arena.name] = arena
+        Message.ARENA_CREATED.send(player, arena.name)
     }
 
-    fun treasureBlue(location: Location, arena: Arena) {
-        removeChest(arena.treasureBlueLocation!!)
-        location.block.type = Material.CHEST
-        val block = location.block
-        if (block.type != Material.CHEST) {
-            return
-        }
-        val chest = block.state as Chest
-        chest.blockInventory.addItem(ItemStack(Material.BLUE_WOOL))
+    fun setTreasureRedLocation(player: Player) {
+        val builder = getPlayerArenaBuilder(player) ?: return
+        builder.treasureRedWeakLocation = WeakLocation.ofLocation(player.location)
+        Message.ARENA_CREATION_TREASURE_RED.send(player)
+        tryBuildingArena(player, builder)
     }
 
-    fun areLocationsSet(arena: Arena): Boolean {
-        return arena.redTeamLocation != null &&
-            arena.blueTeamLocation != null &&
-            arena.treasureRedLocation != null &&
-            arena.treasureBlueLocation != null &&
-            arena.lobbyLocation != null
+    fun setTreasureBlueLocation(player: Player) {
+        val builder = getPlayerArenaBuilder(player) ?: return
+        builder.treasureBlueWeakLocation = WeakLocation.ofLocation(player.location)
+        Message.ARENA_CREATION_TREASURE_BLUE.send(player)
+        tryBuildingArena(player, builder)
     }
 
-    fun setTreasureRedLocation(
-        treasureRedLocation: Location,
-        arena: Arena,
-        player: Player
-    ) {
-        treasureRed(treasureRedLocation, arena)
-
-        val x = treasureRedLocation.blockX
-        val y = treasureRedLocation.blockY
-        val z = treasureRedLocation.blockZ
-        val loc = Location(treasureRedLocation.world, x.toDouble(), y.toDouble(), z.toDouble())
-
-        arena.treasureRedLocation = loc
-        Message.ARENA_CREATION_TREASURERED.send(player)
-        player.closeInventory()
-    }
-
-    fun setTreasureBlueLocation(
-        treasureBlueLocation: Location,
-        arena: Arena,
-        player: Player
-    ) {
-        treasureBlue(treasureBlueLocation, arena)
-
-        val x = treasureBlueLocation.blockX
-        val y = treasureBlueLocation.blockY
-        val z = treasureBlueLocation.blockZ
-        val loc = Location(treasureBlueLocation.world, x.toDouble(), y.toDouble(), z.toDouble())
-
-        arena.treasureBlueLocation = loc
-
-        Message.ARENA_CREATION_TREASUREBLUE.send(player)
-        FwHumanStratego.data.arenas = FwHumanStratego.data.arenas
-        player.closeInventory()
-    }
-
-    fun setRedTeamLocation(
-        redTeamLocation: Location,
-        arena: Arena,
-        player: Player
-    ) {
-        arena.redTeamLocation = redTeamLocation
+    fun setRedTeamLocation(player: Player) {
+        val builder = getPlayerArenaBuilder(player) ?: return
+        builder.redTeamWeakLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TEAMRED.send(player)
-        player.closeInventory()
+        tryBuildingArena(player, builder)
     }
 
-    fun setBlueTeamLocation(
-        blueTeamLocation: Location,
-        arena: Arena,
-        player: Player
-    ) {
-        arena.blueTeamLocation = blueTeamLocation
+    fun setBlueTeamLocation(player: Player) {
+        val builder = getPlayerArenaBuilder(player) ?: return
+        builder.blueTeamWeakLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TEAMBLUE.send(player)
-        player.closeInventory()
+        tryBuildingArena(player, builder)
     }
 
-    fun setLobbyLocation(
-        lobbyLocation: Location,
-        arena: Arena,
-        player: Player
-    ) {
-        arena.lobbyLocation = lobbyLocation
+    fun setLobbyLocation(player: Player) {
+        val builder = getPlayerArenaBuilder(player) ?: return
+        builder.lobbyWeakLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_LOBBY.send(player)
-        player.closeInventory()
+        tryBuildingArena(player, builder)
     }
 
-    fun setArena(player: Player, arena: Arena) {
-        SetArenaGui.showToPlayer(player, arena)
-    }
-
-    fun findArenaByName(arenaName: String) = FwHumanStratego.data.arenas.find { it.name == arenaName }
+    fun getArenaByName(arenaName: String) = arenas[arenaName.toLowerCase()]
 
     fun sendArenaListToPlayer(player: Player) {
-        for (arena in FwHumanStratego.data.arenas) {
-            Message.ARENA_LIST.send(player, arena.name)
+        for (name in arenas.keys) {
+            Message.ARENA_LIST.send(player, name)
         }
     }
 }

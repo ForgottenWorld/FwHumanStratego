@@ -1,37 +1,38 @@
 package com.gmail.samueler53.fwhumanstratego.managers
 
 import com.gmail.samueler53.fwhumanstratego.gui.GamesGui
+import com.gmail.samueler53.fwhumanstratego.message.Message
 import com.gmail.samueler53.fwhumanstratego.objects.Arena
 import com.gmail.samueler53.fwhumanstratego.objects.Game
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import java.util.*
 
 object GameManager {
 
-    private val games = mutableListOf<Game>()
+    private val arenaGames = mutableMapOf<String, Game>()
+
+    private val playerGames = mutableMapOf<UUID, Game>()
 
     val gamesGui = GamesGui()
 
-    fun message() {
+    private fun advertiseNewGame() {
+        val clickMessage = ComponentBuilder("[Clicca qui per giocare]")
+            .color(ChatColor.GREEN)
+            .event(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs join"))
+            .event(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Clicca per giocare")))
+            .create()
+
+        val endMessage = "\n§a${"-".repeat(53)}"
+
         for (player in Bukkit.getOnlinePlayers()) {
             val startMessage =
-                "${ChatColor.GREEN}${"-".repeat(53)}${
-                    ChatColor.DARK_AQUA
-                }Ciao ${player.name}, se vuoi giocare a HumanStratego, clicca sotto"
-
-            val clickMessage = TextComponent("\n\n [Clicca qui per giocare]\n").apply {
-                color = ChatColor.GREEN
-                clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hs join")
-                hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Clicca per giocare"))
-            }
-
-            val endMessage = "${ChatColor.GREEN}${"-".repeat(53)}"
+                "§a${"-".repeat(53)}§3Ciao ${player.name}, se vuoi giocare a HumanStratego, clicca sotto\n\n "
 
             val message = ComponentBuilder()
                 .append(startMessage)
@@ -43,24 +44,41 @@ object GameManager {
         }
     }
 
-    fun startNewGame(arena: Arena, numberOfPlayers: Int): Game {
+    fun onPlayerStartNewGame(player: Player, arena: Arena, numberOfPlayers: Int) {
+        if (arenaGames.size >= 9) {
+            Message.GAME_NO_MORE_GAMES.send(player)
+            return
+        }
+
+        if (numberOfPlayers % 2 != 0 || numberOfPlayers <= 1) {
+            Message.GAME_ODD_PLAYERS.send(player)
+            return
+        }
+
+        if (arenaGames.containsKey(arena.name)) {
+            Message.GAME_ARENA_BUSY.send(player)
+            return
+        }
+
         val game = Game(arena, numberOfPlayers)
-        games.add(game)
-        return game
+        arenaGames[arena.name] = game
+        advertiseNewGame()
+        gamesGui.onGameCreated(arena, game)
     }
 
-    fun isArenaBusy(arena: Arena) = games.any { it.arena == arena }
-
-    fun areInTheSameGame(player1: Player, player2: Player): Boolean {
-        val p1game = getGameForPlayer(player1) ?: return false
-        return p1game == getGameForPlayer(player2)
+    fun setGameForPlayer(player: Player, game: Game) {
+        playerGames[player.uniqueId] = game
     }
 
-    fun getGameForPlayer(player: Player) = games.find { it.isPlayerPlaying(player) }
+    fun removePlayerFromGame(player: Player) {
+        playerGames.remove(player.uniqueId)
+    }
 
-    fun getGameForArena(arena: Arena) = games.find { it.arena == arena }
+    fun getGameForPlayer(player: Player) = playerGames[player.uniqueId]
 
-    fun removeGame(game: Game) {
-        games.remove(game)
+    fun getGameForArena(arena: Arena) = arenaGames[arena.name]
+
+    fun removeGame(arena: Arena) {
+        arenaGames.remove(arena.name)
     }
 }

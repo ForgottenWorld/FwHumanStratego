@@ -1,14 +1,22 @@
 package com.gmail.samueler53.fwhumanstratego.commands
 
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
+import com.gmail.samueler53.fwhumanstratego.managers.RoleManager
 import com.gmail.samueler53.fwhumanstratego.message.Message
-import com.gmail.samueler53.fwhumanstratego.objects.Game
 import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 
-class UserCommand : CommandExecutor {
+class UserCommand : TabExecutor {
+
+    private val commands = listOf(
+        "join",
+        "team",
+        "leave",
+        "role",
+        "info"
+    )
 
     override fun onCommand(
         sender: CommandSender,
@@ -17,87 +25,49 @@ class UserCommand : CommandExecutor {
         args: Array<String>
     ): Boolean {
         if (sender !is Player) return true
+
         if (!sender.hasPermission("humanstratego.usercommand")) return true
-        when (args.size) {
-            1 -> {
-                when (args[0].toLowerCase()) {
-                    "join" -> {
-                        if (GameManager.getGameForPlayer(sender) == null) {
-                            onPlayerRequestGamesGui(sender)
-                        } else {
-                            Message.GAME_LEAVEGAMEFIRST.send(sender)
-                        }
-                    }
-                    "leave" -> {
-                        GameManager.getGameForPlayer(sender)?.let {
-                            onPlayerLeaveGame(it, sender)
-                        }
-                    }
-                    "role" -> {
-                        GameManager.getGameForPlayer(sender)?.let {
-                            onPlayerRequestRoleGui(it, sender)
-                        }
+
+        val game by lazy { GameManager.getGameForPlayer(sender) }
+
+        when (args.getOrNull(0)?.toLowerCase()) {
+            "join" -> {
+                if (game != null) {
+                    Message.GAME_LEAVE_GAME_FIRST.send(sender)
+                } else {
+                    GameManager.gamesGui.gui.show(sender)
+                }
+            }
+            "team" -> {
+                if (game?.currentRound == 0) {
+                    game!!.teamGui.gui.show(sender)
+                }
+            }
+            "leave" -> {
+                game?.onPlayerLeave(sender, false)
+            }
+            "role" -> {
+                game?.onPlayerRequestRoleChange(sender)
+            }
+            "info" -> {
+                if (args.size == 2) {
+                    RoleManager.getRoleByName(args[1])?.let {
+                        sender.sendMessage(it.description)
                     }
                 }
             }
-            2 -> {
-                when (args[0].toLowerCase()) {
-                    "join" -> {
-                        val game = GameManager.getGameForPlayer(sender)
-                        if (game != null && args[1].equals("team", ignoreCase = true)) {
-                            onPlayerRequestTeamsGui(game, sender)
-                        }
-                    }
-                    "info" -> {
-                        GameManager.getGameForPlayer(sender)?.let {
-                            onPlayerRequestRoleInfo(it, sender, args[1])
-                        }
-                    }
-                }
-            }
+            else -> return false
         }
         return true
     }
 
-    private fun onPlayerRequestGamesGui(player: Player) {
-        GameManager.gamesGui.show(player)
-    }
-
-    private fun onPlayerLeaveGame(game: Game, player: Player) {
-        if (game.isStarted) {
-            Message.GAME_LEAVEWHENSTARTED.send(player)
-            return
-        }
-
-        Message.GAME_LEAVE.send(player)
-
-        if (game.isPlayerInTeam(player)) {
-            game.getTeamForPlayer(player).removePlayer(player)
-            game.teamGui.updateGui()
-        }
-
-        game.removePlayer(player)
-        GameManager.gamesGui.modifyGame(game)
-        player.teleport(game.playersLocations[player.uniqueId]!!)
-        game.playersLocations.remove(player.uniqueId)
-    }
-
-    private fun onPlayerRequestRoleGui(game: Game, player: Player) {
-        if (game.isStarted && game.getRoleFromPlayer(player) == null) {
-            game.getTeamForPlayer(player).roleGui.show(player)
-        }
-    }
-
-    private fun onPlayerRequestTeamsGui(game: Game, player: Player) {
-        if (!game.isStarted) {
-            game.teamGui.show(player)
-        }
-    }
-
-    private fun onPlayerRequestRoleInfo(game: Game, player: Player, roleName: String) {
-        if (!game.isStarted) return
-        game.getRoleByName(roleName)?.let {
-            player.sendMessage(it.description)
-        }
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<String>
+    ): List<String> {
+        if (args.size != 1) return listOf()
+        return commands.filter { it.startsWith(args[0], ignoreCase = true) }
     }
 }

@@ -1,95 +1,64 @@
 package com.gmail.samueler53.fwhumanstratego.gui
 
-import com.github.stefvanschie.inventoryframework.Gui
-import com.github.stefvanschie.inventoryframework.GuiItem
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane
-import com.gmail.samueler53.fwhumanstratego.message.Message
+import com.github.stefvanschie.inventoryframework.gui.GuiItem
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 import com.gmail.samueler53.fwhumanstratego.objects.Game
-import com.gmail.samueler53.fwhumanstratego.objects.Team
-import org.bukkit.Material
+import com.gmail.samueler53.fwhumanstratego.utils.editItemMeta
 import org.bukkit.entity.Player
-import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemStack
+import org.bukkit.event.inventory.InventoryClickEvent
 
-class TeamGui(private val game: Game) {
+@Suppress("Unused", "MemberVisibilityCanBePrivate")
+class TeamGui private constructor(
+    private val game: Game,
+) {
 
-    private var mainGui = Gui(3, "TeamsGui").apply {
-        setOnGlobalClick { it.isCancelled = true }
-        addPane(OutlinePane(0, 0, 9, 3).apply {
-            addItem(GuiItem(ItemStack(Material.BLACK_STAINED_GLASS_PANE)))
-            setRepeat(true)
-        })
+    lateinit var gui: ChestGui
+
+    lateinit var redTeamGuiItem: GuiItem
+
+    lateinit var blueTeamGuiItem: GuiItem
+
+
+    fun onGlobalClick(event: InventoryClickEvent) {
+        event.isCancelled = true
     }
 
-    init {
-        addItemStack()
+    fun onOutsideClick(event: InventoryClickEvent) {
+        event.isCancelled = true
     }
 
-    private fun addItemStack() {
-        with (mainGui) {
-            setOnOutsideClick { it.isCancelled = true }
-            addPane(OutlinePane(3, 1, 1, 1).apply {
-                addItem(GuiItem(redTeamItemStack()) {
-                    chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.redTeam)
-                })
-            })
-            addPane(OutlinePane(5, 1, 6, 1).apply {
-                addItem(GuiItem(blueTeamItemStack()) {
-                    chooseTeam(it.whoClicked as? Player ?: return@GuiItem, game.blueTeam)
-                })
-            })
-        }
+    fun onRedTeamClicked(event: InventoryClickEvent) {
+        chooseTeam(event.whoClicked as Player, game.redTeam)
     }
 
-    private fun redTeamItemStack() = ItemStack(Material.RED_WOOL).apply {
-        itemMeta = itemMeta?.apply {
+    fun onBlueTeamClicked(event: InventoryClickEvent) {
+        chooseTeam(event.whoClicked as Player, game.blueTeam)
+    }
+
+    fun update() {
+        redTeamGuiItem.item.editItemMeta {
             setDisplayName("Team Rosso ${game.redTeam.playersRoles.size}/${game.numberOfPlayers / 2}")
         }
-    }
-
-    private fun blueTeamItemStack() = ItemStack(Material.BLUE_WOOL).apply {
-        itemMeta = itemMeta?.apply {
+        blueTeamGuiItem.item.editItemMeta {
             setDisplayName("Team Blu ${game.blueTeam.playersRoles.size}/${game.numberOfPlayers / 2}")
         }
+        gui.update()
     }
 
-    fun updateGui() {
-        addItemStack()
-        mainGui.update()
+    private fun chooseTeam(player: Player, team: Game.Team) {
+        game.onPlayerChooseTeam(player, team)
     }
 
-    fun show(player: Player) {
-        mainGui.show(player)
-    }
+    companion object {
 
-    val inventory: Inventory
-        get() = mainGui.inventory
-
-    private fun chooseTeam(player: Player, team: Team) {
-        if (team.playersRoles.size == game.numberOfPlayers / 2) {
-            Message.GAME_TEAMFULL.send(player)
-            return
-        }
-
-        if (team.playersRoles.containsKey(player.uniqueId)) {
-            team.removePlayer(player)
-        } else {
-            val otherTeam = game.getOtherTeam(team)
-            if (otherTeam.playersRoles.containsKey(player.uniqueId)) {
-                otherTeam.removePlayer(player)
+        fun newInstance(game: Game): TeamGui {
+            val res = FwHumanStratego.instance.getResource("team_gui.xml")!!
+            return TeamGui(game).apply {
+                gui = res.use { ChestGui.load(this, it)!! }
+                gui.inventory.holder
+                update()
             }
-        }
-
-        game.teamAssignment(player, team)
-        updateGui()
-        player.closeInventory()
-        when (team.type) {
-            Team.Type.RED -> Message.GAME_TEAMRED.send(player)
-            Team.Type.BLUE -> Message.GAME_TEAMBLUE.send(player)
-        }
-        if (game.isReadyToStart()) {
-            Message.GAME_ISSTARTING.broadcast(game)
-            game.start()
         }
     }
 }

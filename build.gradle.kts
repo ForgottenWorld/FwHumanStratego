@@ -26,7 +26,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
     compileOnly("com.charleskorn.kaml:kaml:0.29.0")
 
-    implementation("com.github.stefvanschie.inventoryframework:IF:0.7.2")
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.9.5")
     implementation("fr.mrmicky:FastBoard:1.1.0")
 }
 

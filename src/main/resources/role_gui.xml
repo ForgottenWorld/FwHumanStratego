@@ -1,0 +1,5 @@
+<gui rows="3" title="Selezione ruolo" type="chest" onGlobalClick="onGlobalClick" onOutsideClick="onOutsideClick">
+    <outlinepane x="0" y="0" length="9" height="3" repeat="true" field="rolesPane">
+        <item id="black_stained_glass_pane"/>
+    </outlinepane>
+</gui>

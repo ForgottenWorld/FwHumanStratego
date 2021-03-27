@@ -1,106 +1,52 @@
 package com.gmail.samueler53.fwhumanstratego.objects
 
-import com.gmail.samueler53.fwhumanstratego.utils.LocationSerializable
+import com.gmail.samueler53.fwhumanstratego.gui.ArenaBuilderGui
+import com.gmail.samueler53.fwhumanstratego.utils.WeakLocation
 import kotlinx.serialization.Serializable
-import org.bukkit.Location
 
 @Serializable
 data class Arena(
     val name: String,
-    private var redTeamLocationSerializable: LocationSerializable? = null,
-    private var blueTeamLocationSerializable: LocationSerializable? = null,
-    private var treasureRedLocationSerializable: LocationSerializable? = null,
-    private var treasureBlueLocationSerializable: LocationSerializable? = null,
-    private var lobbyLocationSerializable: LocationSerializable? = null
+    private val redTeamWeakLocation: WeakLocation,
+    private val blueTeamWeakLocation: WeakLocation,
+    private val treasureRedWeakLocation: WeakLocation,
+    private val treasureBlueWeakLocation: WeakLocation,
+    private val lobbyWeakLocation: WeakLocation
 ) {
 
-    var redTeamLocation
-        get() = redTeamLocationSerializable?.let {
-            Location(
-                it.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
-            )
-        }
-        set(value) {
-            this.redTeamLocationSerializable = LocationSerializable(
-                value!!.world!!.uid.toString(),
-                value.blockX,
-                value.blockY,
-                value.blockZ
-            )
-        }
+    val redTeamLocation get() = redTeamWeakLocation.toLocation()
 
-    var blueTeamLocation
-        get() = blueTeamLocationSerializable?.let {
-            Location(
-                it.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
-            )
-        }
-        set(value) {
-            blueTeamLocationSerializable = LocationSerializable(
-                value!!.world!!.uid.toString(),
-                value.blockX,
-                value.blockY,
-                value.blockZ
-            )
-        }
+    val blueTeamLocation get() = blueTeamWeakLocation.toLocation()
 
-    var treasureRedLocation
-        get() = treasureRedLocationSerializable?.let {
-            Location(
-                it.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
-            )
-        }
-        set(value) {
-            this.treasureRedLocationSerializable = LocationSerializable(
-                value!!.world!!.uid.toString(),
-                value.blockX,
-                value.blockY,
-                value.blockZ
-            )
-        }
+    val treasureRedLocation get() = treasureRedWeakLocation.toLocation()
 
-    var treasureBlueLocation
-        get() = treasureBlueLocationSerializable?.let {
-            Location(
-                it.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
-            )
-        }
-        set(value) {
-            treasureBlueLocationSerializable = LocationSerializable(
-                value!!.world!!.uid.toString(),
-                value.blockX,
-                value.blockY,
-                value.blockZ
-            )
-        }
+    val treasureBlueLocation get() = treasureBlueWeakLocation.toLocation()
 
-    var lobbyLocation
-        get() = lobbyLocationSerializable?.let {
-            Location(
-                it.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
+    val lobbyLocation get() = lobbyWeakLocation.toLocation()
+    
+    class Builder(private val name: String) {
+
+        val gui = ArenaBuilderGui.newInstance()
+
+        var redTeamWeakLocation: WeakLocation? = null
+
+        var blueTeamWeakLocation: WeakLocation? = null
+
+        var treasureRedWeakLocation: WeakLocation? = null
+
+        var treasureBlueWeakLocation: WeakLocation? = null
+
+        var lobbyWeakLocation: WeakLocation? = null
+        
+        fun build(): Arena? {
+            return Arena(
+                name,
+                redTeamWeakLocation ?: return null,
+                blueTeamWeakLocation ?: return null,
+                treasureRedWeakLocation ?: return null,
+                treasureBlueWeakLocation ?: return null,
+                lobbyWeakLocation ?: return null
             )
         }
-        set(value) {
-            this.lobbyLocationSerializable = LocationSerializable(
-                value!!.world!!.uid.toString(),
-                value.blockX,
-                value.blockY,
-                value.blockZ
-            )
-        }
+    }
 }

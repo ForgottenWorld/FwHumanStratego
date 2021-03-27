@@ -1,0 +1,5 @@
+<gui rows="1" title="Selezione arena" type="chest" onGlobalClick="onGlobalClick" onOutsideClick="onOutsideClick">
+    <outlinepane x="0" y="0" length="9" height="3" repeat="true" field="gamesPane">
+        <item id="black_stained_glass_pane"/>
+    </outlinepane>
+</gui>
