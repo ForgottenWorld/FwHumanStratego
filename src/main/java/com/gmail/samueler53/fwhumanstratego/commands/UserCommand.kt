@@ -35,12 +35,12 @@ class UserCommand : TabExecutor {
                 if (game != null) {
                     Message.GAME_LEAVE_GAME_FIRST.send(sender)
                 } else {
-                    GameManager.gamesGui.gui.show(sender)
+                    GameManager.gamesGui.show(sender)
                 }
             }
             "team" -> {
                 if (game?.currentRound == 0) {
-                    game!!.teamGui.gui.show(sender)
+                    game!!.teamGui.show(sender)
                 }
             }
             "leave" -> {

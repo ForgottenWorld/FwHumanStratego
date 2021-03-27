@@ -19,7 +19,7 @@ object GameManager {
 
     private val playerGames = mutableMapOf<UUID, Game>()
 
-    val gamesGui = GamesGui()
+    val gamesGui = GamesGui.newInstance()
 
     private fun advertiseNewGame() {
         val clickMessage = ComponentBuilder("[Clicca qui per giocare]")
@@ -63,11 +63,14 @@ object GameManager {
         val game = Game(arena, numberOfPlayers)
         arenaGames[arena.name] = game
         advertiseNewGame()
-        gamesGui.onGameCreated(arena, game)
+        gamesGui.update()
     }
+
+    fun getAllGames(): Collection<Game> = arenaGames.values
 
     fun setGameForPlayer(player: Player, game: Game) {
         playerGames[player.uniqueId] = game
+        gamesGui.update()
     }
 
     fun removePlayerFromGame(player: Player) {
@@ -80,5 +83,6 @@ object GameManager {
 
     fun removeGame(arena: Arena) {
         arenaGames.remove(arena.name)
+        gamesGui.update()
     }
 }

@@ -12,7 +12,7 @@ class Scoreboard internal constructor(private val game: Game) {
     private val boards = mutableMapOf<UUID, FastBoard>()
 
     fun initScoreboards() {
-        game.playersPlaying
+        game.players
             .mapNotNull(Bukkit::getPlayer)
             .forEach {
                 boards[it.uniqueId] = FastBoard(it).apply {

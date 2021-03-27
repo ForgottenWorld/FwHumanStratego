@@ -31,11 +31,11 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     GAME_CHOOSE_TEAM("§cDevi scegliere il team, usa il comando /hs join team"),
     GAME_DESERTER("§5%s e' un disertore!"),
     GAME_DRAW("§aLa partita e' finita in pareggio"),
-    GAME_EDITABLE("§aPartita modificata con successo"),
-    GAME_GAMEFULL("§aLa partita e' piena"),
+    GAME_EDITED_SUCCESS("§aPartita modificata con successo"),
+    GAME_IS_FULL("§aLa partita e' piena"),
     GAME_VITAL_CHAR_DEAD("§aUn personaggio vitale è morto, il round e' terminato"),
     GAME_IS_STARTING("§aLa partita sta per iniziare"),
-    GAME_JOIN("§aSei entrato con successo nella partita!"),
+    GAME_JOINED_SUCCESS("§aSei entrato con successo nella partita!"),
     GAME_LEAVE("§aSei stato rimosso dalla partita!"),
     GAME_LEAVE_GAME_FIRST("§cPrima devi leftare il tuo game attuale"),
     GAME_LEAVE_WHEN_STARTED("§cNon ti permetto di abbandonare i tuoi compagni!"),
@@ -52,7 +52,7 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     GAME_STARTED("§cNon puoi modificare una partita gia' iniziata!"),
     GAME_STOLEN_WOOL_BLUE("§a%s ha rubato la lana del team blu!"),
     GAME_STOLEN_WOOL_RED("§a%s ha rubato la lana del team rosso!"),
-    GAME_CANT_STILL_OWN_WOOL("§cNon puoi rubare la tua stessa lana"),
+    GAME_CANT_STEAL_OWN_WOOL("§cNon puoi rubare la tua stessa lana"),
     GAME_STOPPED("§aLa partita e' stata stoppata!"),
     GAME_ASSIGNED_TEAM_BLUE("§9Sei stato assegnato al team blu"),
     GAME_TEAMFULL("§aIl team e' pieno"),
@@ -72,7 +72,7 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     }
 
     fun broadcast(game: Game, vararg objects: Any) {
-        game.playersPlaying.mapNotNull(Bukkit::getPlayer).forEach {
+        game.players.mapNotNull(Bukkit::getPlayer).forEach {
             send(it, *objects)
         }
     }

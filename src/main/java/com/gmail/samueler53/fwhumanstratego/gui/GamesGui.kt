@@ -4,19 +4,18 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
 import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
-import com.gmail.samueler53.fwhumanstratego.objects.Arena
-import com.gmail.samueler53.fwhumanstratego.objects.Game
+import com.gmail.samueler53.fwhumanstratego.managers.GameManager
 import com.gmail.samueler53.fwhumanstratego.utils.editItemMeta
 import com.gmail.samueler53.fwhumanstratego.utils.itemStack
+import com.gmail.samueler53.fwhumanstratego.utils.setLore
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.meta.ItemMeta
 
 @Suppress("Unused", "MemberVisibilityCanBePrivate")
-class GamesGui {
+class GamesGui private constructor() : ChestGuiController() {
 
-    lateinit var gui: ChestGui
+    override lateinit var gui: ChestGui
 
     lateinit var gamesPane: OutlinePane
 
@@ -31,37 +30,20 @@ class GamesGui {
         event.isCancelled = true
     }
 
-    fun onGameCreated(arena: Arena, game: Game) {
-        val itemStack = Material.NETHERITE_BLOCK.itemStack {
-            editItemMeta {
-                setDisplayName(arena.name)
-                setGameInfoLoreStrings(game)
+    fun update() {
+        gamesPane.clear()
+        for (game in GameManager.getAllGames()) {
+            val itemStack = Material.NETHERITE_BLOCK.itemStack {
+                editItemMeta {
+                    setDisplayName(game.arena.name)
+                    setLore("${game.players.size}/${game.numberOfPlayers}")
+                }
             }
-        }
-        val guiItem = GuiItem(itemStack) {
-            game.onPlayerJoin(it.whoClicked as Player)
-        }
-        arenaGuiItems[arena.name] = guiItem
-        gamesPane.addItem(guiItem)
-        gui.update()
-    }
-
-    fun onGameRemoved(game: Game) {
-        val guiItem = arenaGuiItems[game.arena.name] ?: return
-        arenaGuiItems.remove(game.arena.name)
-        gamesPane.removeItem(guiItem)
-        gui.update()
-    }
-
-    fun updateGameInfo(game: Game) {
-        arenaGuiItems[game.arena.name]?.item?.editItemMeta {
-            setGameInfoLoreStrings(game)
+            gamesPane.addItem(GuiItem(itemStack) {
+                game.onPlayerJoin(it.whoClicked as Player)
+            })
         }
         gui.update()
-    }
-
-    private fun ItemMeta.setGameInfoLoreStrings(game: Game) {
-        lore = listOf("${game.playersPlaying.size}/${game.numberOfPlayers}")
     }
 
     companion object {

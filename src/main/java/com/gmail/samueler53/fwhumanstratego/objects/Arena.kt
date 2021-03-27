@@ -1,29 +1,31 @@
 package com.gmail.samueler53.fwhumanstratego.objects
 
 import com.gmail.samueler53.fwhumanstratego.gui.ArenaBuilderGui
+import com.gmail.samueler53.fwhumanstratego.utils.GameplayUtils
 import com.gmail.samueler53.fwhumanstratego.utils.WeakLocation
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Arena(
     val name: String,
-    private val redTeamWeakLocation: WeakLocation,
-    private val blueTeamWeakLocation: WeakLocation,
-    private val treasureRedWeakLocation: WeakLocation,
-    private val treasureBlueWeakLocation: WeakLocation,
-    private val lobbyWeakLocation: WeakLocation
+    val redSpawnWeakLocation: WeakLocation,
+    val blueSpawnWeakLocation: WeakLocation,
+    val treasureRedWeakLocation: WeakLocation,
+    val treasureBlueWeakLocation: WeakLocation,
+    val lobbyWeakLocation: WeakLocation
 ) {
 
-    val redTeamLocation get() = redTeamWeakLocation.toLocation()
+    val redSpawnLocation get() = redSpawnWeakLocation.toLocation()
 
-    val blueTeamLocation get() = blueTeamWeakLocation.toLocation()
-
-    val treasureRedLocation get() = treasureRedWeakLocation.toLocation()
-
-    val treasureBlueLocation get() = treasureBlueWeakLocation.toLocation()
+    val blueSpawnLocation get() = blueSpawnWeakLocation.toLocation()
 
     val lobbyLocation get() = lobbyWeakLocation.toLocation()
-    
+
+    fun ensureChestsExist() {
+        GameplayUtils.ensureChestExistsAtLocation(redSpawnWeakLocation.toLocation())
+        GameplayUtils.ensureChestExistsAtLocation(blueSpawnWeakLocation.toLocation())
+    }
+
     class Builder(private val name: String) {
 
         val gui = ArenaBuilderGui.newInstance()

@@ -7,9 +7,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
 @Suppress("Unused", "MemberVisibilityCanBePrivate")
-class ArenaBuilderGui private constructor() {
+class ArenaBuilderGui private constructor() : ChestGuiController() {
 
-    lateinit var gui: ChestGui
+    override lateinit var gui: ChestGui
 
 
     fun onGlobalClick(event: InventoryClickEvent) {
@@ -44,10 +44,6 @@ class ArenaBuilderGui private constructor() {
         val player = event.whoClicked as Player
         ArenaManager.setLobbyLocation(player)
         player.closeInventory()
-    }
-
-    fun show(player: Player) {
-        gui.show(player)
     }
 
     companion object {

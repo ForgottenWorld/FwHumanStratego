@@ -5,12 +5,17 @@ LISTA COMANDI
 (permesso necessario: humanstratego.admincommand)
 
 ```sh
-/hsa create <nome _arena>
+/hsa create <nome_arena>
 ```
-Viene creata una nuova arena.
+Viene iniziata la fase di creazione di una nuova arena.
 
 ```sh
-/hsa set <nome _arena>
+/hsa discard
+```
+Viene scartata l'arena attualmente in fase di creazione.
+
+```sh
+/hsa set <nome_arena>
 ```
 Verrà aperta una gui che permette di settare tutti i vari punti dell'arena.
 

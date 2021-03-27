@@ -12,15 +12,16 @@ import org.bukkit.entity.Player
 class AdminCommand : TabExecutor {
 
     private val commands = listOf(
-        "stop",
+        "arenas",
         "create",
+        "discard",
+        "info",
+        "modify",
+        "reload",
         "remove",
         "set",
         "start",
-        "modify",
-        "info",
-        "arenas",
-        "reload"
+        "stop",
     )
 
     override fun onCommand(
@@ -66,7 +67,7 @@ class AdminCommand : TabExecutor {
             }
             "create" -> {
                 if (args.size < 2) return false
-                ArenaManager.playerStartBuildingArena(sender, args[1])
+                ArenaManager.onPlayerStartBuildingArena(sender, args[1])
             }
             "stop" -> {
                 game?.onPlayerStopGame(sender)
@@ -75,10 +76,13 @@ class AdminCommand : TabExecutor {
                 arena?.let { ArenaManager.onPlayerDeleteArena(sender, it) }
             }
             "set" -> {
-                ArenaManager.getPlayerArenaBuilder(sender)?.gui?.show(sender)
+                ArenaManager.getArenaBuilderForPlayer(sender)?.gui?.show(sender)
+            }
+            "discard" -> {
+                ArenaManager.onPlayerStopBuildingArena(sender)
             }
             "info" -> {
-                game?.sendArenaInfoToPlayer(sender) ?: Message.GAME_ARENA_FREE.send(sender)
+                game?.onPlayerRequestInfo(sender) ?: Message.GAME_ARENA_FREE.send(sender)
             }
             "start" -> {
                 if (numberOfPlayers == null) return false

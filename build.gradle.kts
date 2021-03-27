@@ -2,6 +2,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
 plugins {
     kotlin("jvm") version "1.4.31"
     kotlin("plugin.serialization") version "1.4.31"
@@ -10,6 +11,8 @@ plugins {
 
 group = "com.gmail.samueler53"
 version = "1.0.0"
+
+val localDeployDir = "/home/giacomo/paper/plugins"
 
 repositories {
     mavenCentral()
@@ -30,12 +33,6 @@ dependencies {
     implementation("fr.mrmicky:FastBoard:1.1.0")
 }
 
-tasks.withType<ProcessResources> {
-    from(sourceSets["main"].resources.srcDirs) {
-        expand("version" to version)
-    }
-}
-
 tasks.withType<ShadowJar> {
     dependencies {
         val included = setOf(
@@ -47,10 +44,26 @@ tasks.withType<ShadowJar> {
             !included.contains(it.moduleGroup)
         }
     }
-    relocate("com.github.stefvanschie.inventoryframework", "com.gmail.samueler53.inventoryframework")
-    relocate("fr.mrmicky.fastboard", "com.gmail.samueler53.fastboard")
+    relocate(
+        "com.github.stefvanschie.inventoryframework",
+        "com.gmail.samueler53.inventoryframework"
+    )
+    relocate(
+        "fr.mrmicky.fastboard",
+        "com.gmail.samueler53.fastboard"
+    )
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.register("localDeploy") {
+    doLast {
+        copy {
+            from("build/libs")
+            into(localDeployDir)
+            include("**/*-all.jar")
+        }
+    }
 }

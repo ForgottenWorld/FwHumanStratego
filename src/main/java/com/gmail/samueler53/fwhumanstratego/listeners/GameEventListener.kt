@@ -1,6 +1,7 @@
 package com.gmail.samueler53.fwhumanstratego.listeners
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
+import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -18,34 +19,40 @@ class GameEventListener : Listener {
         val attacker = event.damager as? Player ?: return
         val attacked = event.entity as? Player ?: return
 
-        val game = GameManager.getGameForPlayer(attacked)
-        if (game?.containsPlayer(attacker) != true) return
+        val attackerGame = GameManager.getGameForPlayer(attacker) ?: return
+        val attackedGame = GameManager.getGameForPlayer(attacked)
+        if (attackerGame != attackedGame) return
 
         event.isCancelled = true
 
-        game.onPlayerAttackPlayer(attacker, attacked)
+        attackerGame.onPlayerAttackPlayer(attacker, attacked)
     }
 
     @EventHandler
-    fun onPlayerChatting(event: AsyncPlayerChatEvent) {
+    fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         GameManager.getGameForPlayer(event.player)?.onPlayerChat(event)
     }
 
     @EventHandler
-    fun onPlayerInventoryClick(event: InventoryClickEvent) {
+    fun onInventoryClick(event: InventoryClickEvent) {
         val player = event.whoClicked as? Player ?: return
         GameManager.getGameForPlayer(player)?.onInventoryClick(player, event)
     }
 
     @EventHandler
-    fun onPlayerLeft(event: PlayerQuitEvent) {
+    fun onPlayerQuit(event: PlayerQuitEvent) {
         GameManager.getGameForPlayer(event.player)?.onPlayerLeave(event.player, true)
+        ArenaManager.onPlayerStopBuildingArena(event.player)
     }
 
     @EventHandler
-    fun onPlayerOpenInventory(event: InventoryOpenEvent) {
+    fun onInventoryOpen(event: InventoryOpenEvent) {
         val player = event.player as? Player ?: return
-        GameManager.getGameForPlayer(player) ?: return
-        if (event.inventory.holder is ChestGui) return
+        val game = GameManager.getGameForPlayer(player) ?: return
+        if (event.inventory.holder is ChestGui ||
+            event.inventory.holder == game.redTeam.treasureChest ||
+            event.inventory.holder == game.blueTeam.treasureChest
+        ) return
+        event.isCancelled = true
     }
 }

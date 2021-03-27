@@ -8,14 +8,18 @@ import com.gmail.samueler53.fwhumanstratego.managers.RoleManager
 import com.gmail.samueler53.fwhumanstratego.objects.Game
 import com.gmail.samueler53.fwhumanstratego.objects.Role
 import com.gmail.samueler53.fwhumanstratego.utils.editItemMeta
+import com.gmail.samueler53.fwhumanstratego.utils.itemStack
+import com.gmail.samueler53.fwhumanstratego.utils.setLore
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemStack
 
 @Suppress("Unused", "MemberVisibilityCanBePrivate")
-class RoleGui private constructor(val game: Game, private val team: Game.Team) {
+class RoleGui private constructor(
+    val game: Game,
+    private val team: Game.Team
+) : ChestGuiController() {
 
-    lateinit var gui: ChestGui
+    override lateinit var gui: ChestGui
 
     lateinit var rolesPane: OutlinePane
 
@@ -41,12 +45,14 @@ class RoleGui private constructor(val game: Game, private val team: Game.Team) {
     private fun getRoleGuiItem(role: Role): GuiItem {
         val remaining = team.rolesRemaining[role]
         val left = role.maxPlayers - team.countPlayersWithRole(role)
-        val itemStack = ItemStack(role.material).editItemMeta {
-            lore = listOf(
-                "Puoi utilizzare questo ruolo ancora $remaining volte",
-                "Ce ne possono essere altri $left in gioco"
-            )
-            setDisplayName(role.displayName)
+        val itemStack = role.material.itemStack {
+            editItemMeta {
+                setLore(
+                    "Puoi utilizzare questo ruolo ancora $remaining volte",
+                    "Ce ne possono essere altri $left in gioco"
+                )
+                setDisplayName(role.displayName)
+            }
         }
         return GuiItem(itemStack) {
             game.onPlayerChangeRole(it.whoClicked as Player, role)

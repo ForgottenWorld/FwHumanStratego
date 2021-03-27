@@ -11,9 +11,9 @@ import org.bukkit.event.inventory.InventoryClickEvent
 @Suppress("Unused", "MemberVisibilityCanBePrivate")
 class TeamGui private constructor(
     private val game: Game,
-) {
+) : ChestGuiController() {
 
-    lateinit var gui: ChestGui
+    override lateinit var gui: ChestGui
 
     lateinit var redTeamGuiItem: GuiItem
 

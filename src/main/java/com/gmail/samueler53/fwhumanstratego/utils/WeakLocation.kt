@@ -19,6 +19,8 @@ class WeakLocation(
         z.toDouble()
     )
 
+    val block get() = Bukkit.getWorld(worldUUID)?.getBlockAt(x, y, z)
+
     companion object {
 
         fun ofLocation(location: Location) = WeakLocation(
