@@ -15,6 +15,7 @@ data class Role(
     val canAttack: Boolean,
     val counterattacks: Boolean,
     val isVital: Boolean,
+    val uses: Int,
     val minPlayersToActivate: Int,
     val description: String,
     val canKillString: String,

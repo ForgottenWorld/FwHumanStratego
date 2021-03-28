@@ -29,25 +29,21 @@ class TeamGui private constructor(
     }
 
     fun onRedTeamClicked(event: InventoryClickEvent) {
-        chooseTeam(event.whoClicked as Player, game.redTeam)
+        game.onPlayerChooseTeam(event.whoClicked as Player, true)
     }
 
     fun onBlueTeamClicked(event: InventoryClickEvent) {
-        chooseTeam(event.whoClicked as Player, game.blueTeam)
+        game.onPlayerChooseTeam(event.whoClicked as Player, false)
     }
 
-    fun update() {
+    fun update(redTeamSize: Int, blueTeamSize: Int) {
         redTeamGuiItem.item.editItemMeta {
-            setDisplayName("Team Rosso ${game.redTeam.playersRoles.size}/${game.numberOfPlayers / 2}")
+            setDisplayName("Team Rosso ${redTeamSize}/${game.numberOfPlayers / 2}")
         }
         blueTeamGuiItem.item.editItemMeta {
-            setDisplayName("Team Blu ${game.blueTeam.playersRoles.size}/${game.numberOfPlayers / 2}")
+            setDisplayName("Team Blu ${blueTeamSize}/${game.numberOfPlayers / 2}")
         }
         gui.update()
-    }
-
-    private fun chooseTeam(player: Player, team: Game.Team) {
-        game.onPlayerChooseTeam(player, team)
     }
 
     companion object {
@@ -57,7 +53,7 @@ class TeamGui private constructor(
             return TeamGui(game).apply {
                 gui = res.use { ChestGui.load(this, it)!! }
                 gui.inventory.holder
-                update()
+                update(0, 0)
             }
         }
     }

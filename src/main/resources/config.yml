@@ -5,6 +5,7 @@
 rounds: 4
 delayStartGame: 300
 pointsFromTreasure: 1500
+allowRoleChanges: false
 
 ###########
 ## Roles ##
@@ -17,6 +18,7 @@ roles:
     can_attack: true
     counterattacks: true
     is_vital: true
+    uses: 1
     min_players_to_activate: 2
     min_players: 1
     max_players: 1
@@ -29,6 +31,7 @@ roles:
     can_attack: true
     counterattacks: false
     is_vital: false
+    uses: 1
     min_players_to_activate: 2
     min_players: 0
     max_players: 1
@@ -41,6 +44,7 @@ roles:
     can_attack: false
     counterattacks: true
     is_vital: false
+    uses: 1
     min_players_to_activate: 4
     min_players: 0
     max_players: 2
@@ -53,6 +57,7 @@ roles:
     can_attack: true
     counterattacks: false
     is_vital: false
+    uses: 1
     min_players_to_activate: 4
     min_players: 0
     max_players: 2
@@ -65,6 +70,7 @@ roles:
     can_attack: true
     counterattacks: false
     is_vital: false
+    uses: 1
     min_players_to_activate: 2
     min_players: 0
     max_players: 2
@@ -77,6 +83,7 @@ roles:
     can_attack: true
     counterattacks: false
     is_vital: false
+    uses: 1
     min_players_to_activate: 2
     min_players: 0
     max_players: 3
@@ -89,6 +96,7 @@ roles:
     can_attack: true
     counterattacks: false
     is_vital: false
+    uses: 1
     min_players_to_activate: 2
     min_players: 0
     max_players: 4

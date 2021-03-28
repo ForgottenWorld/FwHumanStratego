@@ -1,7 +1,5 @@
 package com.gmail.samueler53.fwhumanstratego.message
 
-import com.gmail.samueler53.fwhumanstratego.objects.Game
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 enum class Message(val message: String, private val showPrefix: Boolean = true) {
@@ -48,10 +46,10 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     GAME_ROLE_NO_LONGER_AVAIL("§aIl ruolo non e' disponibile"),
     GAME_ROUND_WINNER("§2Il round e' terminato, ha vinto il team §l%s"),
     GAME_SAME_TEAM("§cNon puoi colpire i membri del tuo team"),
-    GAME_SET_POINTS("§cDevi inserire tutti i punti"),
     GAME_STARTED("§cNon puoi modificare una partita gia' iniziata!"),
     GAME_STOLEN_WOOL_BLUE("§a%s ha rubato la lana del team blu!"),
     GAME_STOLEN_WOOL_RED("§a%s ha rubato la lana del team rosso!"),
+    GAME_CANT_CHANGE_ROLE_NOW("§cNon puoi cambiare ruolo adesso!"),
     GAME_CANT_STEAL_OWN_WOOL("§cNon puoi rubare la tua stessa lana"),
     GAME_STOPPED("§aLa partita e' stata stoppata!"),
     GAME_ASSIGNED_TEAM_BLUE("§9Sei stato assegnato al team blu"),
@@ -69,11 +67,5 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     fun send(player: Player, vararg objects: Any) {
         val formatted = message.format(*objects)
         player.sendMessage(if (showPrefix) "${PREFIX.message} $formatted" else formatted)
-    }
-
-    fun broadcast(game: Game, vararg objects: Any) {
-        game.players.mapNotNull(Bukkit::getPlayer).forEach {
-            send(it, *objects)
-        }
     }
 }

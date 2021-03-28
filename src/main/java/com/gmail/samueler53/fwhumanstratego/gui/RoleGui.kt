@@ -55,7 +55,8 @@ class RoleGui private constructor(
             }
         }
         return GuiItem(itemStack) {
-            game.onPlayerChangeRole(it.whoClicked as Player, role)
+            val player = it.whoClicked as Player
+            if (!game.onPlayerChangeRole(player, role)) show(player)
         }
     }
 

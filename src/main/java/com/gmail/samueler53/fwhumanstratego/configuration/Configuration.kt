@@ -15,10 +15,14 @@ object Configuration {
     var pointsFromTreasure: Int = -1
         private set
 
+    var allowRoleChanges: Boolean = false
+        private set
+
     fun load(plugin: JavaPlugin) {
         rounds = plugin.config.getInt("pointsFromTreasure", 4)
         delayGameStart = plugin.config.getInt("delayStartGame", 300).toLong()
         pointsFromTreasure = plugin.config.getInt("pointsFromTreasure", 1500)
+        allowRoleChanges = plugin.config.getBoolean("allowRoleChanges", false)
         RoleManager.loadRolesFromConfig(plugin.config)
     }
 

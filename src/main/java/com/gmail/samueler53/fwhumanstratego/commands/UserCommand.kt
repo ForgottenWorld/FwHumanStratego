@@ -39,9 +39,7 @@ class UserCommand : TabExecutor {
                 }
             }
             "team" -> {
-                if (game?.currentRound == 0) {
-                    game!!.teamGui.show(sender)
-                }
+                game?.showTeamGui(sender)
             }
             "leave" -> {
                 game?.onPlayerLeave(sender, false)

@@ -75,6 +75,7 @@ object GameManager {
 
     fun removePlayerFromGame(player: Player) {
         playerGames.remove(player.uniqueId)
+        gamesGui.update()
     }
 
     fun getGameForPlayer(player: Player) = playerGames[player.uniqueId]

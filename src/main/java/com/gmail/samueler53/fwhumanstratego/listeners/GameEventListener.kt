@@ -1,6 +1,5 @@
 package com.gmail.samueler53.fwhumanstratego.listeners
 
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
 import org.bukkit.entity.Player
@@ -21,7 +20,7 @@ class GameEventListener : Listener {
 
         val attackerGame = GameManager.getGameForPlayer(attacker) ?: return
         val attackedGame = GameManager.getGameForPlayer(attacked)
-        if (attackerGame != attackedGame) return
+        if (attackerGame !== attackedGame) return
 
         event.isCancelled = true
 
@@ -48,11 +47,6 @@ class GameEventListener : Listener {
     @EventHandler
     fun onInventoryOpen(event: InventoryOpenEvent) {
         val player = event.player as? Player ?: return
-        val game = GameManager.getGameForPlayer(player) ?: return
-        if (event.inventory.holder is ChestGui ||
-            event.inventory.holder == game.redTeam.treasureChest ||
-            event.inventory.holder == game.blueTeam.treasureChest
-        ) return
-        event.isCancelled = true
+        GameManager.getGameForPlayer(player)?.onInventoryOpen(event)
     }
 }

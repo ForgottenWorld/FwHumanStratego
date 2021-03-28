@@ -36,7 +36,7 @@ class GamesGui private constructor() : ChestGuiController() {
             val itemStack = Material.NETHERITE_BLOCK.itemStack {
                 editItemMeta {
                     setDisplayName(game.arena.name)
-                    setLore("${game.players.size}/${game.numberOfPlayers}")
+                    setLore("${game.currentNumberOfPlayers}/${game.numberOfPlayers}")
                 }
             }
             gamesPane.addItem(GuiItem(itemStack) {

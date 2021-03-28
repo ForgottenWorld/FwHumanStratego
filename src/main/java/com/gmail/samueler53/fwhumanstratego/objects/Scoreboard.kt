@@ -2,23 +2,20 @@ package com.gmail.samueler53.fwhumanstratego.objects
 
 import com.gmail.samueler53.fwhumanstratego.message.Message
 import fr.mrmicky.fastboard.FastBoard
-import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.*
 
-class Scoreboard internal constructor(private val game: Game) {
+class Scoreboard internal constructor() {
 
     private val boards = mutableMapOf<UUID, FastBoard>()
 
-    fun initScoreboards() {
-        game.players
-            .mapNotNull(Bukkit::getPlayer)
-            .forEach {
-                boards[it.uniqueId] = FastBoard(it).apply {
-                    updateTitle(Message.PREFIX.message)
-                }
+    fun initScoreboards(players: List<Player>) {
+        for (player in players) {
+            boards[player.uniqueId] = FastBoard(player).apply {
+                updateTitle(Message.PREFIX.message)
             }
+        }
     }
 
     fun removeScoreboards() {

@@ -13,7 +13,7 @@
             <displayname>Tesoro blu</displayname>
         </item>
         <item id="glass_pane" onClick="onLobbyClicked">
-            <displayname>Lobby</displayname>
+            <displayname>Spawn della lobby</displayname>
         </item>
     </outlinepane>
 </gui>

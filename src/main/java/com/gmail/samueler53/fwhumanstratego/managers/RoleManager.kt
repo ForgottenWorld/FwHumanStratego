@@ -24,6 +24,7 @@ object RoleManager {
                         canAttack = getBoolean("can_attack"),
                         counterattacks = getBoolean("counterattacks"),
                         isVital = getBoolean("isVital"),
+                        uses = getInt("uses"),
                         minPlayers = getInt("min_players"),
                         maxPlayers = getInt("max_players"),
                         minPlayersToActivate = getInt("min_players_to_activate"),
