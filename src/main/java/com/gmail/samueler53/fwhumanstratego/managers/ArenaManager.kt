@@ -88,35 +88,35 @@ object ArenaManager {
 
     fun setTreasureRedLocation(player: Player) {
         val builder = getArenaBuilderForPlayer(player) ?: return
-        builder.treasureRedWeakLocation = WeakLocation.ofLocation(player.location)
+        builder.redTreasureLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TREASURE_RED.send(player)
         tryBuildingArena(player, builder)
     }
 
     fun setTreasureBlueLocation(player: Player) {
         val builder = getArenaBuilderForPlayer(player) ?: return
-        builder.treasureBlueWeakLocation = WeakLocation.ofLocation(player.location)
+        builder.blueTreasureLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TREASURE_BLUE.send(player)
         tryBuildingArena(player, builder)
     }
 
     fun setRedTeamLocation(player: Player) {
         val builder = getArenaBuilderForPlayer(player) ?: return
-        builder.redTeamWeakLocation = WeakLocation.ofLocation(player.location)
+        builder.redTeamLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TEAMRED.send(player)
         tryBuildingArena(player, builder)
     }
 
     fun setBlueTeamLocation(player: Player) {
         val builder = getArenaBuilderForPlayer(player) ?: return
-        builder.blueTeamWeakLocation = WeakLocation.ofLocation(player.location)
+        builder.blueTeamLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_TEAMBLUE.send(player)
         tryBuildingArena(player, builder)
     }
 
     fun setLobbyLocation(player: Player) {
         val builder = getArenaBuilderForPlayer(player) ?: return
-        builder.lobbyWeakLocation = WeakLocation.ofLocation(player.location)
+        builder.lobbyLocation = WeakLocation.ofLocation(player.location)
         Message.ARENA_CREATION_LOBBY.send(player)
         tryBuildingArena(player, builder)
     }

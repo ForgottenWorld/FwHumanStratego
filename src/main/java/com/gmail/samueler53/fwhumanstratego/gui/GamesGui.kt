@@ -46,6 +46,7 @@ class GamesGui private constructor() : ChestGuiController() {
         gui.update()
     }
 
+
     companion object {
 
         fun newInstance(): GamesGui {

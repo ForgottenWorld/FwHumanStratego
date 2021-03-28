@@ -45,25 +45,25 @@ class Game(
     private val redTeam = object : Team(
         "ROSSO",
         Material.RED_WOOL,
-        arena.treasureRedWeakLocation,
+        arena.redTreasureLocation,
         GameplayUtils.createDyedLeatherChestplate(Color.RED),
         Message.GAME_ASSIGNED_TEAM_RED,
         Message.GAME_STOLEN_WOOL_RED
     ) {
         override val roleGui = RoleGui.newInstance(this@Game, this)
-        override val spawnLocation get() = arena.redSpawnLocation
+        override val spawnLocation get() = arena.redSpawnLocation.toLocation()
     }
 
     private val blueTeam = object : Team(
         "BLU",
         Material.BLUE_WOOL,
-        arena.treasureBlueWeakLocation,
+        arena.blueTreasureLocation,
         GameplayUtils.createDyedLeatherChestplate(Color.BLUE),
         Message.GAME_ASSIGNED_TEAM_BLUE,
         Message.GAME_STOLEN_WOOL_BLUE
     ) {
         override val roleGui = RoleGui.newInstance(this@Game, this)
-        override val spawnLocation get() = arena.blueSpawnLocation
+        override val spawnLocation get() = arena.blueSpawnLocation.toLocation()
     }
 
 
@@ -93,7 +93,7 @@ class Game(
 
         GameplayUtils.cleansePlayer(player)
 
-        player.teleport(arena.lobbyLocation)
+        player.teleport(arena.lobbyLocation.toLocation())
 
         launch {
             delayTicks(1)
@@ -290,7 +290,7 @@ class Game(
             return
         }
 
-        losingTeam.teleportPlayerToSpawn(loser)
+        losingTeam.respawnPlayer(loser)
         losingTeam.playersRoles.remove(loser.uniqueId)
         losingTeam.roleGui.updateRoles()
     }
@@ -307,9 +307,7 @@ class Game(
 
         GameplayUtils.cleansePlayer(player)
 
-        if (!disconnect) {
-            Message.GAME_LEAVE.send(player)
-        }
+        if (!disconnect) Message.GAME_LEAVE.send(player)
 
         players.remove(player.uniqueId)
         player.teleport(playerReturnLocations[player.uniqueId]!!.toLocation())
@@ -448,8 +446,6 @@ class Game(
                 roleGui.updateRoles()
             }
 
-        val hasRolesLeft get() = rolesRemaining.values.none { it != 0 }
-
         val opponent get() = if (redTeam == this) this else blueTeam
 
         val treasureChest get() = treasureLocation.block?.state as? Chest
@@ -471,14 +467,14 @@ class Game(
             role.sendInfoLinkToPlayer(player)
         }
 
-        fun teleportPlayerToSpawn(player: Player) {
+        fun respawnPlayer(player: Player) {
             player.teleport(spawnLocation)
             launch {
                 delayTicks(1)
-                if (!hasRolesLeft) {
-                    Message.GAME_CHOOSE_ROLE.send(player)
+                if (!rolesRemaining.values.none { it != 0 }) {
                     player.gameMode = GameMode.SPECTATOR
                 } else {
+                    Message.GAME_CHOOSE_ROLE.send(player)
                     roleGui.show(player)
                     GameplayUtils.rootPlayer(player)
                 }
@@ -491,7 +487,7 @@ class Game(
             for (player in players.mapNotNull(Bukkit::getPlayer)) {
                 player.gameMode = GameMode.SURVIVAL
                 player.inventory.chestplate = kit
-                teleportPlayerToSpawn(player)
+                respawnPlayer(player)
             }
         }
 
@@ -514,9 +510,7 @@ class Game(
                 return
             }
 
-            val role = player.role ?: return
             playersRoles.remove(player.uniqueId)
-            rolesRemaining[role] = rolesRemaining[role]!! + 1
             roleGui.updateRoles()
 
             onPlayerLoseWool(player)

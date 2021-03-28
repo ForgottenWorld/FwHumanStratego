@@ -8,12 +8,12 @@ commands:
   humanstratego:
     permission: humanstratego.usercommand
     description: Comando base
-    aliases: hs
-    usage: test
+    aliases: [hs,humanstratego]
+    usage: /hs [ join | team | leave | role | info ]
     permission-message: Non hai i permessi per usare questo comando
   humanstrategoadmin:
     permission: humanstratego.admincommand
     description: Comando admin
-    aliases: hsa
-    usage: test
+    aliases: [hsa,humanstrategoadmin]
+    usage: /hsa [ arenas | create | discard | info | modify | reload | remove | set | start | stop ]
     permission-message: Non hai i permessi per usare questo comando
