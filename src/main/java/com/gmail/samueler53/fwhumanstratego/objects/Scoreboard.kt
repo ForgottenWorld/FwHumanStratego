@@ -10,6 +10,7 @@ class Scoreboard internal constructor() {
 
     private val boards = mutableMapOf<UUID, FastBoard>()
 
+
     fun initScoreboards(players: List<Player>) {
         for (player in players) {
             boards[player.uniqueId] = FastBoard(player).apply {

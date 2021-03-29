@@ -41,7 +41,7 @@ object GameplayUtils {
         for (effect in player.activePotionEffects) {
             player.removePotionEffect(effect.type)
         }
-        player.gameMode = GameMode.SURVIVAL
+        player.gameMode = GameMode.ADVENTURE
         player.walkSpeed = 0.2f
         player.closeInventory()
         if (clearInventory) {

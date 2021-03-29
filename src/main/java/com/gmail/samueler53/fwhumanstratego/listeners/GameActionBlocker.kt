@@ -5,8 +5,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.player.PlayerDropItemEvent
@@ -23,34 +21,24 @@ class GameActionBlocker : Listener {
     }
 
     @EventHandler
-    fun onPlayerDamaged(event: EntityDamageEvent) {
+    fun onEntityDamaged(event: EntityDamageEvent) {
         val player = event.entity as? Player ?: return
         cancelEventIfPlayerInGame(player, event)
     }
 
     @EventHandler
-    fun onPlayerBreaking(event: BlockBreakEvent) {
+    fun onPlayerDropItem(event: PlayerDropItemEvent) {
         cancelEventIfPlayerInGame(event.player, event)
     }
 
     @EventHandler
-    fun onPlayerDropping(event: PlayerDropItemEvent) {
-        cancelEventIfPlayerInGame(event.player, event)
-    }
-
-    @EventHandler
-    fun onPlayerFoodLevelChange(event: FoodLevelChangeEvent) {
+    fun onFoodLevelChange(event: FoodLevelChangeEvent) {
         val player = event.entity as? Player ?: return
         cancelEventIfPlayerInGame(player, event)
     }
 
     @EventHandler
-    fun onPlayerInteract(event: PlayerInteractEntityEvent) {
-        cancelEventIfPlayerInGame(event.player, event)
-    }
-
-    @EventHandler
-    fun onPlayerPlacing(event: BlockPlaceEvent) {
+    fun onPlayerInteractEntity(event: PlayerInteractEntityEvent) {
         cancelEventIfPlayerInGame(event.player, event)
     }
 }

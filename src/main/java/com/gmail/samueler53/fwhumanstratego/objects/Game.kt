@@ -37,6 +37,7 @@ class Game(
     private val teamGui = TeamGui.newInstance(this)
 
     private val playerReturnLocations = mutableMapOf<UUID, WeakLocation>()
+    private val playerReturnGameModes = mutableMapOf<UUID, GameMode>()
 
     private val scoreboard = Scoreboard()
 
@@ -88,6 +89,7 @@ class Game(
         Message.GAME_JOINED_SUCCESS.send(player)
 
         playerReturnLocations[player.uniqueId] = WeakLocation.ofLocation(player.location)
+        playerReturnGameModes[player.uniqueId] = player.gameMode
         players.add(player.uniqueId)
         GameManager.setGameForPlayer(player, this)
 
@@ -162,6 +164,7 @@ class Game(
         for ((uuid, loc) in playerReturnLocations) {
             val player = Bukkit.getPlayer(uuid) ?: continue
             GameplayUtils.cleansePlayer(player)
+            player.gameMode = playerReturnGameModes[player.uniqueId]!!
             player.teleport(loc.toLocation())
         }
         GameManager.removeGame(arena)
@@ -310,8 +313,10 @@ class Game(
         if (!disconnect) Message.GAME_LEAVE.send(player)
 
         players.remove(player.uniqueId)
+        player.gameMode = playerReturnGameModes[player.uniqueId]!!
         player.teleport(playerReturnLocations[player.uniqueId]!!.toLocation())
         playerReturnLocations.remove(player.uniqueId)
+        playerReturnGameModes.remove(player.uniqueId)
     }
 
     fun onPlayerRequestRoleChange(player: Player) {
@@ -485,7 +490,7 @@ class Game(
             roleGui.updateRoles()
             restoreTreasure()
             for (player in players.mapNotNull(Bukkit::getPlayer)) {
-                player.gameMode = GameMode.SURVIVAL
+                player.gameMode = GameMode.ADVENTURE
                 player.inventory.chestplate = kit
                 respawnPlayer(player)
             }

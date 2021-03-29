@@ -8,9 +8,9 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     ARENA_BUILDER_CREATED("Selezionare le posizioni dell'arena"),
     ARENA_CREATED(
         """
-        §e${"-".repeat(53)}§aL'arena: §6%s§a e' stata creata con successo!
+        §e${Message.LINE}§aL'arena: §6%s§a e' stata creata con successo!
         
-        §e${"-".repeat(53)}
+        §e${Message.LINE}
         """.trimIndent()
     ),
     ARENA_CREATION_LOBBY("§7Spawn della lobby settata!§6"),
@@ -67,5 +67,9 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     fun send(player: Player, vararg objects: Any) {
         val formatted = message.format(*objects)
         player.sendMessage(if (showPrefix) "${PREFIX.message} $formatted" else formatted)
+    }
+
+    companion object {
+        private val LINE = "-".repeat(53)
     }
 }
