@@ -1,3 +1,12 @@
+##########################
+## Integration settings ##
+##########################
+
+enableFWEchelonIntegration: false
+enableEchelonMutex: false
+enableEchelonMinigames: false
+echelonMinigameRotationNumberOfPlayers: 16
+
 ###################
 ## Game Settings ##
 ###################

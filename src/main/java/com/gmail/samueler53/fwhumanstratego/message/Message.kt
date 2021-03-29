@@ -51,6 +51,7 @@ enum class Message(val message: String, private val showPrefix: Boolean = true) 
     GAME_STOLEN_WOOL_RED("§a%s ha rubato la lana del team rosso!"),
     GAME_CANT_CHANGE_ROLE_NOW("§cNon puoi cambiare ruolo adesso!"),
     GAME_CANT_STEAL_OWN_WOOL("§cNon puoi rubare la tua stessa lana"),
+    CANT_JOIN_FROM_HERE("§cNon puoi unirti a questa partita da qui!"),
     GAME_STOPPED("§aLa partita e' stata stoppata!"),
     GAME_ASSIGNED_TEAM_BLUE("§9Sei stato assegnato al team blu"),
     GAME_TEAMFULL("§aIl team e' pieno"),

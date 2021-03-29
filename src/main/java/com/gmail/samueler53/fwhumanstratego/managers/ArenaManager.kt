@@ -53,6 +53,10 @@ object ArenaManager {
         }
     }
 
+    fun getRandomFreeArena() = arenas.values
+        .filter { GameManager.getGameForArena(it) == null }
+        .random()
+
     fun onPlayerStartBuildingArena(player: Player, name: String) {
         if (arenas.keys.contains(name)) {
             Message.ARENA_ALREADY_EXISTS.send(player, name)

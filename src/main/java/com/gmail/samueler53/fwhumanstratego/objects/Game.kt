@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.gmail.samueler53.fwhumanstratego.configuration.Configuration
 import com.gmail.samueler53.fwhumanstratego.gui.RoleGui
 import com.gmail.samueler53.fwhumanstratego.gui.TeamGui
+import com.gmail.samueler53.fwhumanstratego.integrations.FWEchelonIntegrationManager
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
 import com.gmail.samueler53.fwhumanstratego.managers.RoleManager
 import com.gmail.samueler53.fwhumanstratego.message.Message
@@ -29,7 +30,8 @@ import java.util.*
 
 class Game(
     val arena: Arena,
-    var numberOfPlayers: Int
+    var numberOfPlayers: Int,
+    val isJoinableFromList: Boolean = true
 ) {
 
     private val players = mutableSetOf<UUID>()
@@ -67,8 +69,8 @@ class Game(
         override val spawnLocation get() = arena.blueSpawnLocation.toLocation()
     }
 
-
     val currentNumberOfPlayers get() = players.size
+
 
     private fun resetAvailableRoles() {
         val playersPerTeam = numberOfPlayers / 2
@@ -154,9 +156,9 @@ class Game(
         onDelayRoundStart()
     }
 
-    fun onPlayerStopGame(player: Player) {
+    fun onGameStopped(stopper: Player?) {
         onRoundEnd(null)
-        Message.GAME_STOPPED.send(player)
+        stopper?.let(Message.GAME_STOPPED::send)
         onGameEnd(true)
     }
 
@@ -173,6 +175,7 @@ class Game(
             .maxByOrNull { it.score }
             ?.let { Message.GAME_GAME_OVER_TEAM_WINS.broadcast(it.name) }
             ?: Message.GAME_DRAW.broadcast()
+        FWEchelonIntegrationManager.onMinigameFinished(this)
     }
 
     private fun onPlayerLoseWool(player: Player) {

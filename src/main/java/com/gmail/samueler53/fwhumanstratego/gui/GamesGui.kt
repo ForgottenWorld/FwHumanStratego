@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
 import com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 import com.gmail.samueler53.fwhumanstratego.managers.GameManager
+import com.gmail.samueler53.fwhumanstratego.message.Message
 import com.gmail.samueler53.fwhumanstratego.utils.editItemMeta
 import com.gmail.samueler53.fwhumanstratego.utils.itemStack
 import com.gmail.samueler53.fwhumanstratego.utils.setLore
@@ -40,7 +41,12 @@ class GamesGui private constructor() : ChestGuiController() {
                 }
             }
             gamesPane.addItem(GuiItem(itemStack) {
-                game.onPlayerJoin(it.whoClicked as Player)
+                val player = it.whoClicked as Player
+                if (game.isJoinableFromList) {
+                    game.onPlayerJoin(player)
+                } else {
+                    Message.CANT_JOIN_FROM_HERE.send(player)
+                }
             })
         }
         gui.update()

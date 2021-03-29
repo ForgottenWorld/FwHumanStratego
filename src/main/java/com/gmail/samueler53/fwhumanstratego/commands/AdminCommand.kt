@@ -70,7 +70,7 @@ class AdminCommand : TabExecutor {
                 ArenaManager.onPlayerStartBuildingArena(sender, args[1])
             }
             "stop" -> {
-                game?.onPlayerStopGame(sender)
+                game?.onGameStopped(sender)
             }
             "remove" -> {
                 arena?.let { ArenaManager.onPlayerDeleteArena(sender, it) }

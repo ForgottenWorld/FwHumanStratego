@@ -4,6 +4,8 @@ main: com.gmail.samueler53.fwhumanstratego.FwHumanStratego
 api-version: 1.16
 depend:
   - FWKotlinDeps
+softdepend:
+  - FWEchelon
 commands:
   humanstratego:
     permission: humanstratego.usercommand

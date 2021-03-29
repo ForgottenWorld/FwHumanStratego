@@ -1,5 +1,6 @@
 package com.gmail.samueler53.fwhumanstratego.managers
 
+import com.gmail.samueler53.fwhumanstratego.configuration.Configuration
 import com.gmail.samueler53.fwhumanstratego.gui.GamesGui
 import com.gmail.samueler53.fwhumanstratego.message.Message
 import com.gmail.samueler53.fwhumanstratego.objects.Arena
@@ -64,6 +65,45 @@ object GameManager {
         arenaGames[arena.name] = game
         advertiseNewGame()
         gamesGui.update()
+    }
+
+    fun onAllPlayersForceRemoved(reason: String?) {
+        for (player in playerGames.keys.mapNotNull(Bukkit::getPlayer)) {
+            if (reason == null) {
+                player.sendMessage("La partita è stata interrotta.")
+            } else {
+                player.sendMessage("La partita è stata interrotta per il seguento motivo: $reason.")
+            }
+        }
+        for (game in getAllGames()) {
+            game.onGameStopped(null)
+        }
+    }
+
+    fun onPlayerForceRemoved(player: Player, reason: String?) {
+        if (reason == null) {
+            player.sendMessage("Sei stato rimosso dalla partita.")
+        } else {
+            player.sendMessage("Sei stato rimosso dalla partita per il seguento motivo: $reason.")
+        }
+        playerGames[player.uniqueId]?.onPlayerLeave(player, true)
+    }
+
+    fun reserveGameForEchelon(): Game {
+        if (arenaGames.size >= 9) {
+            arenaGames.values.random().onGameStopped(null)
+        }
+
+        val arena = ArenaManager.getRandomFreeArena()
+
+        val game = Game(
+            arena,
+            Configuration.echelonMinigameRotationNumberOfPlayers,
+            false
+        )
+
+        arenaGames[arena.name] = game
+        return game
     }
 
     fun getAllGames(): Collection<Game> = arenaGames.values

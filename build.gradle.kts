@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.ForgottenWorld.FWEchelon:fwechelon:v0.0.8-alpha2")
+    compileOnly("com.github.ForgottenWorld.FWEchelon:fwechelon-api:v0.1.0")
     compileOnly("org.spigotmc:spigot-api:1.16.3-R0.1-SNAPSHOT")
     compileOnly("com.github.BrunoSilvaFreire:Skedule:0.1.3")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")

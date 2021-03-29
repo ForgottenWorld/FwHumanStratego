@@ -3,6 +3,7 @@ package com.gmail.samueler53.fwhumanstratego
 import com.gmail.samueler53.fwhumanstratego.commands.AdminCommand
 import com.gmail.samueler53.fwhumanstratego.commands.UserCommand
 import com.gmail.samueler53.fwhumanstratego.configuration.Configuration
+import com.gmail.samueler53.fwhumanstratego.integrations.FWEchelonIntegrationManager
 import com.gmail.samueler53.fwhumanstratego.listeners.GameActionBlocker
 import com.gmail.samueler53.fwhumanstratego.listeners.GameEventListener
 import com.gmail.samueler53.fwhumanstratego.managers.ArenaManager
@@ -22,6 +23,8 @@ class FwHumanStratego : JavaPlugin() {
 
         server.pluginManager.registerEvents(GameEventListener(), instance)
         server.pluginManager.registerEvents(GameActionBlocker(), instance)
+
+        FWEchelonIntegrationManager.enableIntegration()
     }
 
     companion object {
